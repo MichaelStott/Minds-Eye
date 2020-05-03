@@ -119,7 +119,7 @@ impl<'a> Context<'a> {
                     });
                 } else if c == 'B' {
                     self.tiles.push(Tile {
-                        texture: String::from("res/img/dbg_floor.png"),
+                        texture: String::from("res/img/grayblock.png"),
                         width: TILE_WIDTH,
                         height: TILE_HEIGHT,
                         x: curx,
@@ -128,11 +128,11 @@ impl<'a> Context<'a> {
                         targety: cury,
                         resistancex: 0,
                         resistancey: 0,
-                        iswall: false,
+                        iswall: true,
                         isblock: false
                     });
                     temp_eyes.push(Eye {
-                        direction: String::from("down"),
+                        direction: String::from("left"),
                         x: curx,
                         y: cury,
                         width: TILE_WIDTH,
