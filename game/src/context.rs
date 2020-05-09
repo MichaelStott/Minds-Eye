@@ -1,21 +1,20 @@
-
+use crate::camera::Camera;
+use crate::eye::Eye;
+use crate::input_handler::InputHandler;
+use crate::player::Player;
+use crate::resource_manager::ResourceManager;
+use crate::state::State;
+use crate::tile::Tile;
 use sdl2::render::WindowCanvas;
 use sdl2::EventPump;
-use crate::camera::Camera;
-use crate::player::Player;
-use crate::tile::Tile;
-use crate::eye::Eye;
-use crate::state::State;
-use crate::resource_manager::ResourceManager;
-use crate::input_handler::InputHandler;
 
-use sdl2::render::Texture;
-use sdl2::render::TextureCreator; 
-use sdl2::video::{WindowContext};
 use sdl2::mixer::Music;
+use sdl2::render::Texture;
+use sdl2::render::TextureCreator;
+use sdl2::video::WindowContext;
 
-use std::fs;
 use std::collections::HashMap;
+use std::fs;
 use std::path::Path;
 
 const TILE_WIDTH: u32 = 64;
@@ -42,13 +41,13 @@ impl<'a> Context<'a> {
         Context {
             tiles: Vec::new(),
             blocks: Vec::new(),
-            eyes: Vec:: new(),
+            eyes: Vec::new(),
             player: Player::new(),
             camera: Camera::new(),
             flags: HashMap::new(),
             input: InputHandler::new(),
-            texture_manager:  TextureManager::new(&texture_creator),
-            music: sdl2::mixer::Music::from_file(Path::new("res/sound/sanchopanza.mp3")).unwrap()
+            texture_manager: TextureManager::new(&texture_creator),
+            music: sdl2::mixer::Music::from_file(Path::new("res/sound/sanchopanza.mp3")).unwrap(),
         }
     }
 
@@ -73,7 +72,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: false,
-                        isblock: false
+                        isblock: false,
                     });
                 } else if c == 'x' {
                     self.tiles.push(Tile {
@@ -87,7 +86,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: true,
-                        isblock: false
+                        isblock: false,
                     });
                 } else if c == 'b' {
                     self.tiles.push(Tile {
@@ -101,7 +100,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: false,
-                        isblock: false
+                        isblock: false,
                     });
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/blueblock.png"),
@@ -114,7 +113,7 @@ impl<'a> Context<'a> {
                         resistancex: 30,
                         resistancey: 30,
                         iswall: false,
-                        isblock: true
+                        isblock: true,
                     });
                 } else if c == 'g' {
                     self.tiles.push(Tile {
@@ -128,7 +127,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: false,
-                        isblock: false
+                        isblock: false,
                     });
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/greenblock.png"),
@@ -141,7 +140,7 @@ impl<'a> Context<'a> {
                         resistancex: 30,
                         resistancey: 30,
                         iswall: false,
-                        isblock: true
+                        isblock: true,
                     });
                 } else if c == 'r' {
                     self.tiles.push(Tile {
@@ -155,7 +154,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: false,
-                        isblock: false
+                        isblock: false,
                     });
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/redblock.png"),
@@ -168,7 +167,7 @@ impl<'a> Context<'a> {
                         resistancex: 30,
                         resistancey: 30,
                         iswall: false,
-                        isblock: true
+                        isblock: true,
                     });
                 } else if c == 'B' {
                     self.tiles.push(Tile {
@@ -182,7 +181,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: true,
-                        isblock: false
+                        isblock: false,
                     });
                     temp_eyes.push(Eye {
                         direction: String::from("left"),
@@ -194,7 +193,7 @@ impl<'a> Context<'a> {
                         solved: false,
                         deltax: 0,
                         deltay: 0,
-                        anger: 0
+                        anger: 0,
                     });
                 } else if c == 'R' {
                     self.tiles.push(Tile {
@@ -208,7 +207,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: true,
-                        isblock: false
+                        isblock: false,
                     });
                     temp_eyes.push(Eye {
                         direction: String::from("left"),
@@ -220,7 +219,7 @@ impl<'a> Context<'a> {
                         solved: false,
                         deltax: 0,
                         deltay: 0,
-                        anger: 0
+                        anger: 0,
                     });
                 } else if c == 'G' {
                     self.tiles.push(Tile {
@@ -234,7 +233,7 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: true,
-                        isblock: false
+                        isblock: false,
                     });
                     temp_eyes.push(Eye {
                         direction: String::from("left"),
@@ -246,7 +245,7 @@ impl<'a> Context<'a> {
                         solved: false,
                         deltax: 0,
                         deltay: 0,
-                        anger: 0
+                        anger: 0,
                     });
                 } else if c == 'p' {
                     self.tiles.push(Tile {
@@ -260,10 +259,11 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: false,
-                        isblock: false
+                        isblock: false,
                     });
                     self.player.x = curx + (TILE_WIDTH / 2) as i32 - (self.player.width / 2) as i32;
-                    self.player.y = cury - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32;
+                    self.player.y =
+                        cury - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32;
                 }
                 curx += TILE_WIDTH as i32;
             }
@@ -276,8 +276,12 @@ impl<'a> Context<'a> {
             self.eyes.push(eye);
         }
     }
-    
-    pub fn update(&mut self, state: &mut dyn State, event: &mut EventPump) -> Option<Box<dyn State>> {
+
+    pub fn update(
+        &mut self,
+        state: &mut dyn State,
+        event: &mut EventPump,
+    ) -> Option<Box<dyn State>> {
         self.input.update(event);
         state.update(self)
     }

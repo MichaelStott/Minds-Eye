@@ -1,5 +1,5 @@
-use sdl2::EventPump;
 use sdl2::keyboard::Keycode;
+use sdl2::EventPump;
 
 use std::collections::HashSet;
 
@@ -14,12 +14,16 @@ impl InputHandler {
         InputHandler {
             new_keys: HashSet::new(),
             prev_keys: HashSet::new(),
-            current_keys: HashSet::new() 
+            current_keys: HashSet::new(),
         }
     }
 
     pub fn update(&mut self, events: &mut EventPump) {
-        let keys: HashSet<Keycode> = events.keyboard_state().pressed_scancodes().filter_map(Keycode::from_scancode).collect();
+        let keys: HashSet<Keycode> = events
+            .keyboard_state()
+            .pressed_scancodes()
+            .filter_map(Keycode::from_scancode)
+            .collect();
         self.new_keys = &keys - &self.prev_keys;
         self.prev_keys = &self.prev_keys - &keys;
         self.current_keys = keys;

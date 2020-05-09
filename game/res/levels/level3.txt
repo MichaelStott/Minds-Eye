@@ -1,9 +1,9 @@
-xxxxx xxxx
-x***xGx**x
-x*b***g**x
-xx**B*B**xx
- G**g**G
-xx**B*B*xxx
-x*g*p*b***x
+ xxxx xxxx
 x***xGx***x
-xxxxx xxxx
+x**b***g**x
+xx**B*B**xx
+ G***g***G
+xx**B*B**xx
+x**g*p*b**x
+x***xGx***x
+ xxxx xxxx

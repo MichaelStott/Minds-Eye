@@ -18,11 +18,11 @@ pub struct Tile {
     pub resistancex: u32,
     pub resistancey: u32,
     pub iswall: bool,
-    pub isblock: bool
+    pub isblock: bool,
 }
 
 impl Tile {
-    pub fn update(&mut self, tiles: & Vec<Tile>) {
+    pub fn update(&mut self, tiles: &Vec<Tile>) {
         let prevx = self.x;
         if self.targetx != self.x {
             let dir = (self.targetx - self.x) / (self.targetx - self.x).abs();
@@ -34,7 +34,7 @@ impl Tile {
             };
         }
         for tile in tiles {
-            if (tile.iswall) && does_intersect(tile, self){
+            if (tile.iswall) && does_intersect(tile, self) {
                 self.x = prevx;
             }
         }
@@ -42,7 +42,7 @@ impl Tile {
         if self.targety != self.y {
             let dir = (self.targety - self.y) / (self.targety - self.y).abs();
             let delta = 3;
-            
+
             self.y = if dir * (self.y + delta * dir) > dir * self.targety {
                 self.targety
             } else {
@@ -50,27 +50,43 @@ impl Tile {
             };
         }
         for tile in tiles {
-            if (tile.iswall) && does_intersect(tile, self){
+            if (tile.iswall) && does_intersect(tile, self) {
                 self.y = prevy;
             }
         }
     }
 
     pub fn draw(&mut self, texture: &Texture, camera: &mut Camera, canvas: &mut WindowCanvas) {
-        canvas.copy(
-            &texture,
-            None,
-            Some(Rect::new(self.x - camera.x, self.y  - camera.y, self.width, self.height)),
-        ).unwrap();
+        canvas
+            .copy(
+                &texture,
+                None,
+                Some(Rect::new(
+                    self.x - camera.x,
+                    self.y - camera.y,
+                    self.width,
+                    self.height,
+                )),
+            )
+            .unwrap();
         // Render the collision box.
         if settings::DEBUG {
             canvas.set_draw_color(Color::RGB(220, 220, 220));
-            canvas.draw_rect(Rect::new(self.x - camera.x, self.y  - camera.y, self.width, self.height)).unwrap();
+            canvas
+                .draw_rect(Rect::new(
+                    self.x - camera.x,
+                    self.y - camera.y,
+                    self.width,
+                    self.height,
+                ))
+                .unwrap();
         }
     }
 }
 
-pub fn does_intersect(player: & Tile, tile: & Tile) -> bool {
-    (player.x < tile.x + tile.width as i32) && (player.x + player.width as i32 > tile.x) &&
-        (player.y < tile.y + tile.height as i32) && (player.y + player.height as i32 > tile.y)
+pub fn does_intersect(player: &Tile, tile: &Tile) -> bool {
+    (player.x < tile.x + tile.width as i32)
+        && (player.x + player.width as i32 > tile.x)
+        && (player.y < tile.y + tile.height as i32)
+        && (player.y + player.height as i32 > tile.y)
 }

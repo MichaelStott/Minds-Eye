@@ -4,11 +4,11 @@ use crate::settings;
 
 use std::collections::HashMap;
 
+use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
 use sdl2::render::Texture;
-use sdl2::keyboard::Keycode;
+use sdl2::render::WindowCanvas;
 
 pub struct Player {
     pub width: u32,
@@ -21,7 +21,7 @@ pub struct Player {
     pub delay: i32,
     pub frame: i32,
     pub active_animation: String,
-    pub animations: HashMap<String, Vec<Rect>>
+    pub animations: HashMap<String, Vec<Rect>>,
 }
 
 impl Player {
@@ -37,7 +37,7 @@ impl Player {
             delay: 15,
             frame: 0,
             active_animation: String::from("walk_down"),
-            animations: Player::generate_animations()
+            animations: Player::generate_animations(),
         }
     }
 
@@ -108,10 +108,11 @@ impl Player {
                 self.active_animation = String::from("walk_down");
             }
         }
-        if !((input.key_pressed(&Keycode::Left) && !input.key_pressed(&Keycode::Right)) ||
-                (input.key_pressed(&Keycode::Right) && !input.key_pressed(&Keycode::Left)) ||
-                (input.key_pressed(&Keycode::Up) && !input.key_pressed(&Keycode::Down)) ||
-                (input.key_pressed(&Keycode::Down) && !input.key_pressed(&Keycode::Up))) {
+        if !((input.key_pressed(&Keycode::Left) && !input.key_pressed(&Keycode::Right))
+            || (input.key_pressed(&Keycode::Right) && !input.key_pressed(&Keycode::Left))
+            || (input.key_pressed(&Keycode::Up) && !input.key_pressed(&Keycode::Down))
+            || (input.key_pressed(&Keycode::Down) && !input.key_pressed(&Keycode::Up)))
+        {
             if self.active_animation == "walk_left" {
                 self.active_animation = String::from("idle_left")
             } else if self.active_animation == "walk_right" {
@@ -137,32 +138,62 @@ impl Player {
             self.delay = 15
         }
     }
-    
+
     pub fn move_player(&mut self, dx: i32, dy: i32) {
         self.x += dx;
         self.y += dy;
     }
 
-    pub fn draw(&mut self, texture: &Texture, shadowTexture: &Texture, camera: &mut Camera, canvas: &mut WindowCanvas) {
+    pub fn draw(
+        &mut self,
+        texture: &Texture,
+        shadowTexture: &Texture,
+        camera: &mut Camera,
+        canvas: &mut WindowCanvas,
+    ) {
         // Old Drop Shadow
-        canvas.copy(shadowTexture, 
+        canvas.copy(
+            shadowTexture,
             Rect::new(0, 0, self.width, self.width),
-            Rect::new(self.x - camera.x, self.y  - camera.y + 24, self.width, self.height)
+            Rect::new(
+                self.x - camera.x,
+                self.y - camera.y + 24,
+                self.width,
+                self.height,
+            ),
         );
         canvas.set_draw_color(Color::RGB(0, 220, 0));
-        canvas.copy_ex(
-            &texture,
-            self.animations.get(&self.active_animation).unwrap()[self.frame as usize],
-            Rect::new(self.x - camera.x, self.y  - camera.y, self.width, self.height),
-            0.0,
-            None,
-            if self.active_animation == "walk_left" || self.active_animation == "idle_left" { true } else { false },
-            false
-        ).unwrap();
+        canvas
+            .copy_ex(
+                &texture,
+                self.animations.get(&self.active_animation).unwrap()[self.frame as usize],
+                Rect::new(
+                    self.x - camera.x,
+                    self.y - camera.y,
+                    self.width,
+                    self.height,
+                ),
+                0.0,
+                None,
+                if self.active_animation == "walk_left" || self.active_animation == "idle_left" {
+                    true
+                } else {
+                    false
+                },
+                false,
+            )
+            .unwrap();
         // Render the collision box.
         if settings::DEBUG {
             canvas.set_draw_color(Color::RGB(0, 220, 0));
-            canvas.draw_rect(Rect::new(self.x - camera.x, self.y  - camera.y, self.width, self.height)).unwrap();
+            canvas
+                .draw_rect(Rect::new(
+                    self.x - camera.x,
+                    self.y - camera.y,
+                    self.width,
+                    self.height,
+                ))
+                .unwrap();
         }
     }
 }
