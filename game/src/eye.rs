@@ -10,7 +10,7 @@ use sdl2::render::WindowCanvas;
 use rand::Rng;
 
 pub struct Eye {
-    pub direction: String,
+    pub direction: String, // Unused variable.
     pub color: String,
     pub solved: bool,
     pub x: i32,
@@ -28,39 +28,54 @@ impl Eye {
         let mut rng = rand::thread_rng();
         self.solved = false;
         let mut distance = -1;
-        let mut isblock = true;
+        let mut isblock = false;
         // Check for the closest block.
-        for tile in tiles {
-            if self.direction == "left" {
-                if tile.y == self.y && self.x > tile.x && (tile.isblock || tile.iswall) {
-                    if distance == -1 || self.x - tile.x < distance {
-                        distance = self.x - tile.x;
-                        isblock = tile.isblock;
-                    }
+        for tile in tiles.iter_mut() {
+            if tile.y == self.y && self.x > tile.x && (tile.isblock || tile.iswall) {
+                if distance == -1 || self.x - tile.x < distance {
+                    distance = self.x - tile.x;
+                    isblock = tile.isblock && tile.texture.contains(&self.color);
+                    self.direction = String::from("left");
                 }
-            } else if self.direction == "right" {
+            }
+        }
+        if !isblock {
+            distance = -1;
+            for tile in tiles.iter_mut() {
                 if tile.y == self.y && self.x < tile.x && (tile.isblock || tile.iswall) {
                     if distance == -1 || tile.x - self.x < distance {
                         distance = tile.x - self.x;
-                        isblock = tile.isblock;
-                    }
-                }
-            } else if self.direction == "down" {
-                if tile.x == self.x && self.y < tile.y && (tile.isblock || tile.iswall) {
-                    if distance == -1 || tile.y - self.y < distance {
-                        distance = tile.y - self.y;
-                        isblock = tile.isblock;
-                    }
-                }
-            } else if self.direction == "up" {
-                if tile.x == self.x && self.y > tile.y && (tile.isblock || tile.iswall) {
-                    if distance == -1 || self.y - tile.y < distance {
-                        distance = self.y - tile.y;
-                        isblock = tile.isblock;
+                        isblock = tile.isblock && tile.texture.contains(&self.color);
+                        self.direction = String::from("right");
                     }
                 }
             }
         }
+        if !isblock {
+            distance = -1;
+            for tile in tiles.iter_mut() {
+                if tile.x == self.x && self.y < tile.y && (tile.isblock || tile.iswall) {
+                    if distance == -1 || tile.y - self.y < distance {
+                        distance = tile.y - self.y;
+                        isblock = tile.isblock && tile.texture.contains(&self.color);
+                        self.direction = String::from("up");
+                    }
+                }
+            }
+        }
+        if !isblock {
+            distance = -1;
+            for tile in tiles.iter_mut() {
+                if tile.x == self.x && self.y > tile.y && (tile.isblock || tile.iswall) {
+                    if distance == -1 || self.y - tile.y < distance {
+                        distance = self.y - tile.y;
+                        isblock = tile.isblock && tile.texture.contains(&self.color);
+                        self.direction = String::from("down");
+                    }
+                }
+            }
+        }
+        
         // If we found a valid block, mark as solved.
         if isblock {
             if self.direction == "left" {
@@ -73,12 +88,12 @@ impl Eye {
                 self.deltax = if self.deltax < 12 { self.deltax + 1 } else { 12 };
                 self.deltay = 0;
                 self.anger = if self.anger != 255 && self.anger as i32 + 10 < 255 { self.anger + 10 } else { 255 };
-            } else if self.direction == "down" {
+            } else if self.direction == "up" {
                 self.solved = true;
                 self.deltay = if self.deltay < 6 { self.deltay + 1 } else { 6 };
                 self.deltax = 0;
                 self.anger = if self.anger != 255 && self.anger as i32 + 10 < 255 { self.anger + 10 } else { 255 };
-            } else if self.direction == "up" {
+            } else if self.direction == "down" {
                 self.solved = true;
                 self.deltay = if self.deltay > -6 { self.deltay - 1 } else { -6 };
                 self.deltax = 0;

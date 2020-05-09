@@ -86,32 +86,32 @@ impl Player {
     pub fn update(&mut self, input: &mut InputHandler) {
         // Update movement
         let prev_anim = self.active_animation.clone();
-        if input.key_pressed(&Keycode::Left) {
+        if input.key_pressed(&Keycode::Left) && !input.key_pressed(&Keycode::Right) {
             self.velx -= 3;
             if self.active_animation != "walk_left" {
                 self.active_animation = String::from("walk_left");
             }
-        }
-        if input.key_pressed(&Keycode::Right) {
+        } else if input.key_pressed(&Keycode::Right) && !input.key_pressed(&Keycode::Left) {
             self.velx += 3;
             if self.active_animation != "walk_right" {
                 self.active_animation = String::from("walk_right");
             }
         }
-        if input.key_pressed(&Keycode::Up) {
+        if input.key_pressed(&Keycode::Up) && !input.key_pressed(&Keycode::Down) {
             self.vely -= 3;
             if self.active_animation != "walk_up" {
                 self.active_animation = String::from("walk_up");
             }
-        }
-        if input.key_pressed(&Keycode::Down) {
+        } else if input.key_pressed(&Keycode::Down) && !input.key_pressed(&Keycode::Up) {
             self.vely += 3;
             if self.active_animation != "walk_down" {
                 self.active_animation = String::from("walk_down");
             }
         }
-        if !(input.key_pressed(&Keycode::Left) || input.key_pressed(&Keycode::Right) ||
-                input.key_pressed(&Keycode::Up) || input.key_pressed(&Keycode::Down)) {
+        if !((input.key_pressed(&Keycode::Left) && !input.key_pressed(&Keycode::Right)) ||
+                (input.key_pressed(&Keycode::Right) && !input.key_pressed(&Keycode::Left)) ||
+                (input.key_pressed(&Keycode::Up) && !input.key_pressed(&Keycode::Down)) ||
+                (input.key_pressed(&Keycode::Down) && !input.key_pressed(&Keycode::Up))) {
             if self.active_animation == "walk_left" {
                 self.active_animation = String::from("idle_left")
             } else if self.active_animation == "walk_right" {
@@ -143,7 +143,12 @@ impl Player {
         self.y += dy;
     }
 
-    pub fn draw(&mut self, texture: &Texture, camera: &mut Camera, canvas: &mut WindowCanvas) {
+    pub fn draw(&mut self, texture: &Texture, shadowTexture: &Texture, camera: &mut Camera, canvas: &mut WindowCanvas) {
+        // Old Drop Shadow
+        canvas.copy(shadowTexture, 
+            Rect::new(0, 0, self.width, self.width),
+            Rect::new(self.x - camera.x, self.y  - camera.y + 24, self.width, self.height)
+        );
         canvas.set_draw_color(Color::RGB(0, 220, 0));
         canvas.copy_ex(
             &texture,

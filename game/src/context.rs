@@ -48,13 +48,12 @@ impl<'a> Context<'a> {
             flags: HashMap::new(),
             input: InputHandler::new(),
             texture_manager:  TextureManager::new(&texture_creator),
-            music: sdl2::mixer::Music::from_file(Path::new("res/sound/speech.ogg")).unwrap()
+            music: sdl2::mixer::Music::from_file(Path::new("res/sound/sanchopanza.mp3")).unwrap()
         }
     }
 
-    // TODO: This needs to be removed...
     pub fn load_level(&mut self, level: String) {
-        // self.music.play(-1).unwrap();
+        self.music.play(-1).unwrap();
         let f = fs::read_to_string(level).expect("Could not load level!");
         let mut cury: i32 = 10;
         let mut temp_blocks: Vec<Tile> = Vec::new();
@@ -117,6 +116,60 @@ impl<'a> Context<'a> {
                         iswall: false,
                         isblock: true
                     });
+                } else if c == 'g' {
+                    self.tiles.push(Tile {
+                        texture: String::from("res/img/dbg_floor.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 0,
+                        resistancey: 0,
+                        iswall: false,
+                        isblock: false
+                    });
+                    temp_blocks.push(Tile {
+                        texture: String::from("res/img/greenblock.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 30,
+                        resistancey: 30,
+                        iswall: false,
+                        isblock: true
+                    });
+                } else if c == 'r' {
+                    self.tiles.push(Tile {
+                        texture: String::from("res/img/dbg_floor.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 0,
+                        resistancey: 0,
+                        iswall: false,
+                        isblock: false
+                    });
+                    temp_blocks.push(Tile {
+                        texture: String::from("res/img/redblock.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 30,
+                        resistancey: 30,
+                        iswall: false,
+                        isblock: true
+                    });
                 } else if c == 'B' {
                     self.tiles.push(Tile {
                         texture: String::from("res/img/grayblock.png"),
@@ -143,6 +196,74 @@ impl<'a> Context<'a> {
                         deltay: 0,
                         anger: 0
                     });
+                } else if c == 'R' {
+                    self.tiles.push(Tile {
+                        texture: String::from("res/img/grayblock.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 0,
+                        resistancey: 0,
+                        iswall: true,
+                        isblock: false
+                    });
+                    temp_eyes.push(Eye {
+                        direction: String::from("left"),
+                        x: curx,
+                        y: cury,
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        color: String::from("red"),
+                        solved: false,
+                        deltax: 0,
+                        deltay: 0,
+                        anger: 0
+                    });
+                } else if c == 'G' {
+                    self.tiles.push(Tile {
+                        texture: String::from("res/img/grayblock.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 0,
+                        resistancey: 0,
+                        iswall: true,
+                        isblock: false
+                    });
+                    temp_eyes.push(Eye {
+                        direction: String::from("left"),
+                        x: curx,
+                        y: cury,
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        color: String::from("green"),
+                        solved: false,
+                        deltax: 0,
+                        deltay: 0,
+                        anger: 0
+                    });
+                } else if c == 'p' {
+                    self.tiles.push(Tile {
+                        texture: String::from("res/img/dbg_floor.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 0,
+                        resistancey: 0,
+                        iswall: false,
+                        isblock: false
+                    });
+                    self.player.x = curx + (TILE_WIDTH / 2) as i32 - (self.player.width / 2) as i32;
+                    self.player.y = cury - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32;
                 }
                 curx += TILE_WIDTH as i32;
             }

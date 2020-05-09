@@ -15,5 +15,8 @@ impl Camera {
     pub fn focus(&mut self, foc_x: i32, foc_y: i32) {
         self.x = foc_x - (self.width >> 1);
         self.y = foc_y - (self.height >> 1);
+        if self.y < 0 {
+            self.y = 0;
+        }
     }
 }

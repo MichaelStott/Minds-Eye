@@ -44,17 +44,32 @@ impl State for GameState {
 
         // Get all of the image assets.
         let tex_player = context.texture_manager.load("res/img/player.png").unwrap();
+        let tex_shadow = context.texture_manager.load("res/img/drop_shadow.png").unwrap();
         let tex_socket = context.texture_manager.load("res/img/socket.png").unwrap();
-        let tex_pupil = context.texture_manager.load("res/img/bluepupil.png").unwrap();
-
-        // Draw all the tiles.
+        
+        // Draw the scene.
         for tile in &mut context.tiles {
-            tile.draw(&context.texture_manager.load(&tile.texture).unwrap(), &mut context.camera, canvas);
+            if !tile.isblock && !tile.iswall {
+                tile.draw(&context.texture_manager.load(&tile.texture).unwrap(), &mut context.camera, canvas);
+            }
+        }
+        context.player.draw(&tex_player, &tex_shadow, &mut context.camera, canvas);
+        for tile in &mut context.tiles {
+            if tile.isblock || tile.iswall {
+                tile.draw(&context.texture_manager.load(&tile.texture).unwrap(), &mut context.camera, canvas);
+            }
         }
         for eye in context.eyes.iter_mut() {
+            let tex_pupil = if eye.color == "blue" {
+                context.texture_manager.load("res/img/bluepupil.png").unwrap()
+            } else {if eye.color == "red" {
+                context.texture_manager.load("res/img/redpupil.png").unwrap()
+            } else {
+                context.texture_manager.load("res/img/greenpupil.png").unwrap()
+            }};
+
             eye.draw(&tex_socket, &tex_pupil, &mut context.camera, canvas);
         }
-        context.player.draw(&tex_player, &mut context.camera, canvas);
         canvas.present();
     }
 

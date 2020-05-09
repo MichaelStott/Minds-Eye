@@ -1,0 +1,4 @@
+cargo:rustc-flags=-l SDL2
+cargo:rustc-flags=-l SDL2_mixer
+cargo:rustc-flags=-l SDL2_image
+cargo:rustc-flags=-l SDL2_ttf
