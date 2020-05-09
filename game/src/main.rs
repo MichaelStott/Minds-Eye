@@ -56,7 +56,7 @@ pub fn main() -> Result<(), String> {
     let mut context = Context::new(&mut texture_creator);
     
     // TODO: This should be handled in the game state....
-    context.load_level(String::from("res/levels/level1.txt"));
+    context.load_level(String::from("res/levels/level3.txt"));
     context.camera.width = (canvas.output_size().unwrap().0) as i32;
     context.camera.height = (canvas.output_size().unwrap().1) as i32;
     

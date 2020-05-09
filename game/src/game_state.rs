@@ -9,6 +9,7 @@ use sdl2::pixels::Color;
 pub struct GameState  {}
 
 impl State for GameState {
+
     fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>> {
         // TODO: Refactor this.
         let new_tiles = &mut context.tiles.to_vec(); 
@@ -67,7 +68,6 @@ impl State for GameState {
             } else {
                 context.texture_manager.load("res/img/greenpupil.png").unwrap()
             }};
-
             eye.draw(&tex_socket, &tex_pupil, &mut context.camera, canvas);
         }
         canvas.present();
