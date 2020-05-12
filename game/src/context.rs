@@ -52,7 +52,7 @@ impl<'a> Context<'a> {
     }
 
     pub fn load_level(&mut self, level: String) {
-        self.music.play(-1).unwrap();
+        //self.music.play(-1).unwrap();
         let f = fs::read_to_string(level).expect("Could not load level!");
         let mut cury: i32 = 10;
         let mut temp_blocks: Vec<Tile> = Vec::new();

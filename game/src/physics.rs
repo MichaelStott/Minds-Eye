@@ -24,6 +24,7 @@ fn handle_collision_x(player: &mut Player, tiles: &mut Vec<Tile>) {
                         if tile.resistancex <= 0 {
                             tile.targetx = dir * -1 * tile.width as i32 + tile.x;
                             tile.resistancex = 30;
+                            tile.resistancey = 30;
                         } else {
                             tile.resistancex -= 1;
                         }
@@ -52,6 +53,7 @@ fn handle_collision_y(player: &mut Player, tiles: &mut Vec<Tile>) {
                     if tile.isblock {
                         if tile.resistancey <= 0 {
                             tile.targety = dir * -1 * tile.height as i32 + tile.y;
+                            tile.resistancex = 30;
                             tile.resistancey = 30;
                         } else {
                             tile.resistancey -= 1;

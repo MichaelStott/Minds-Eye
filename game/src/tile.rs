@@ -50,7 +50,7 @@ impl Tile {
             };
         }
         for tile in tiles {
-            if (tile.iswall) && does_intersect(tile, self) {
+            if (tile.iswall ) && does_intersect(tile, self) {
                 self.y = prevy;
             }
         }
