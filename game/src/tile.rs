@@ -1,6 +1,8 @@
 use crate::camera::Camera;
 use crate::settings;
 
+use std::ptr;
+
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
@@ -24,6 +26,7 @@ pub struct Tile {
 impl Tile {
     pub fn update(&mut self, tiles: &Vec<Tile>) {
         let prevx = self.x;
+        let prevy = self.y;
         if self.targetx != self.x {
             let dir = (self.targetx - self.x) / (self.targetx - self.x).abs();
             let delta = 3;
@@ -34,11 +37,12 @@ impl Tile {
             };
         }
         for tile in tiles {
-            if (tile.iswall) && does_intersect(tile, self) {
+            if (tile.iswall || tile.isblock) && !(prevx == tile.x && prevy == tile.y) && does_intersect(tile, self) {
                 self.x = prevx;
+                self.resistancex = 30;
+                self.targetx = self.x;
             }
         }
-        let prevy = self.y;
         if self.targety != self.y {
             let dir = (self.targety - self.y) / (self.targety - self.y).abs();
             let delta = 3;
@@ -50,8 +54,10 @@ impl Tile {
             };
         }
         for tile in tiles {
-            if (tile.iswall ) && does_intersect(tile, self) {
+            if (tile.iswall || tile.isblock) && !(prevx == tile.x && prevy == tile.y) && does_intersect(tile, self) {
                 self.y = prevy;
+                self.resistancey = 30;
+                self.targety = self.y;
             }
         }
     }

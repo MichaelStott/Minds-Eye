@@ -25,6 +25,11 @@ impl State for StartMenuState {
     fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
+        
+        let font = context.font_manager.load(&context.font_details).unwrap();
+        let surface = font.render("Hello Rust!").blended(Color::RGBA(255, 0, 0, 255)).unwrap();
+        //let font_texture = context.texture_manager.texture_creator.create_texture_from_surface(&surface).unwrap();
+        //canvas.copy(&font_texture, None, None)?;
         canvas.present();
     }
 

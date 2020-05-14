@@ -14,6 +14,8 @@ mod start_menu_state;
 mod state;
 mod tile;
 
+
+use crate::start_menu_state::StartMenuState;
 use crate::game_state::GameState;
 use crate::state::State;
 use context::Context;
@@ -52,10 +54,11 @@ pub fn main() -> Result<(), String> {
 
     // Initial context instantiation.
     let mut texture_creator = canvas.texture_creator();
-    let mut context = Context::new(&mut texture_creator);
+    let mut font_context= sdl2::ttf::init().unwrap();
+    let mut context = Context::new(&mut texture_creator, &mut font_context);
 
     // TODO: This should be handled in the game state....
-    context.load_level(String::from("res/levels/level2.txt"));
+    context.load_level(String::from("res/levels/level4.txt"));
     context.camera.width = (canvas.output_size().unwrap().0) as i32;
     context.camera.height = (canvas.output_size().unwrap().1) as i32;
 

@@ -5,8 +5,13 @@ use crate::state::State;
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 
+use std::rc::Rc;
+use std::cell::RefCell;
+
 #[derive(Clone)]
-pub struct GameState {}
+pub struct GameState {
+    
+}
 
 impl State for GameState {
     fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>> {
@@ -32,7 +37,7 @@ impl State for GameState {
         // Update the player.
         context.player.update(&mut context.input);
         handle_collisions(&mut context.player, &mut context.tiles);
-        context.camera.focus(context.player.x, context.player.y);
+        context.camera.focus(context.player.x - context.player.width as i32 / 2, context.player.y + context.player.height as i32 / 2);
 
         // No state change has occured.
         None
@@ -48,8 +53,6 @@ impl State for GameState {
             .texture_manager
             .load("res/img/drop_shadow.png")
             .unwrap();
-        let mut tex_socket = context.texture_manager.load("res/img/socket.png").unwrap();
-
         // Draw the scene.
         for tile in &mut context.tiles {
             if !tile.isblock && !tile.iswall {
@@ -92,7 +95,7 @@ impl State for GameState {
                 }
             };
             eye.draw(
-                &mut tex_socket.clone(),
+                &mut context.socket_tex,
                 &tex_pupil,
                 &mut context.camera,
                 canvas,
@@ -101,7 +104,9 @@ impl State for GameState {
         canvas.present();
     }
 
-    fn on_enter(&mut self) {}
+    fn on_enter(&mut self) {
+
+    }
 
     fn on_exit(&mut self) {}
 

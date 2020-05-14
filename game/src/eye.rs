@@ -131,17 +131,29 @@ impl Eye {
         if !self.solved {
             self.deltax = rng.gen_range(-3, 3);
             self.deltay = rng.gen_range(-3, 3);
+            self.anger = if self.anger != 0 && self.anger as i32 - 10 > 0 {
+                self.anger - 10
+            } else {
+                0
+            };
         }
     }
 
     pub fn draw(
         &mut self,
-        tex_socket: &Texture,
+        tex_socket: &mut Texture,
         tex_pupil: &Texture,
         camera: &mut Camera,
         canvas: &mut WindowCanvas,
     ) {
-        //socket.set_color_mod(0, self.anger, 0);
+        if self.color == "red" {
+            tex_socket.set_color_mod(255, self.anger, self.anger);
+        } else if self.color == "green" {
+            tex_socket.set_color_mod(self.anger, 255, self.anger);
+        } else if self.color == "blue" {
+            tex_socket.set_color_mod(self.anger, self.anger, 255);
+        }
+        
         canvas
             .copy(
                 &tex_socket,

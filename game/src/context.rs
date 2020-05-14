@@ -1,8 +1,11 @@
+use sdl2::ttf::Sdl2TtfContext;
+use sdl2::ttf::Font;
 use crate::camera::Camera;
 use crate::eye::Eye;
 use crate::input_handler::InputHandler;
 use crate::player::Player;
 use crate::resource_manager::ResourceManager;
+use crate::resource_manager::FontDetails;
 use crate::state::State;
 use crate::tile::Tile;
 use sdl2::render::WindowCanvas;
@@ -11,16 +14,19 @@ use sdl2::EventPump;
 use sdl2::mixer::Music;
 use sdl2::render::Texture;
 use sdl2::render::TextureCreator;
+use sdl2::image::{LoadTexture, InitFlag};
 use sdl2::video::WindowContext;
 
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+use std::rc::Rc;
 
 const TILE_WIDTH: u32 = 64;
 const TILE_HEIGHT: u32 = 64;
 
 type TextureManager<'l, T> = ResourceManager<'l, String, Texture<'l>, TextureCreator<T>>;
+type FontManager<'l> = ResourceManager<'l, FontDetails, Font<'l, 'static>, Sdl2TtfContext>;
 
 /// Contains all globally shared game data.
 pub struct Context<'a> {
@@ -32,12 +38,14 @@ pub struct Context<'a> {
     pub flags: HashMap<String, bool>,
     pub input: InputHandler,
     pub music: Music<'a>,
-    // Textures
+    pub socket_tex: Texture<'a>,
     pub texture_manager: TextureManager<'a, WindowContext>,
+    pub font_manager: FontManager<'a>,
+    pub font_details: FontDetails,
 }
 
 impl<'a> Context<'a> {
-    pub fn new(texture_creator: &'a TextureCreator<WindowContext>) -> Self {
+    pub fn new(texture_creator: &'a TextureCreator<WindowContext>, ttf_context: &'a Sdl2TtfContext) -> Self {
         Context {
             tiles: Vec::new(),
             blocks: Vec::new(),
@@ -47,16 +55,27 @@ impl<'a> Context<'a> {
             flags: HashMap::new(),
             input: InputHandler::new(),
             texture_manager: TextureManager::new(&texture_creator),
-            music: sdl2::mixer::Music::from_file(Path::new("res/sound/sanchopanza.mp3")).unwrap(),
+            socket_tex: texture_creator.load_texture(Path::new("res/img/socket.png")).unwrap(),
+            music: sdl2::mixer::Music::from_file(Path::new("res/sound/laidback.mp3")).unwrap(),
+            font_manager: FontManager::new(ttf_context),
+            font_details: FontDetails { path: String::from("res/fonts/VeniceClassic.ttf"), size: 19},
         }
     }
 
     pub fn load_level(&mut self, level: String) {
-        //self.music.play(-1).unwrap();
+        //let mut font = ttf_context.load_font(Path::new("res/font/VeniceClassic.ttf"), 19).unwrap();
+        // let font_path = String::from("res/font/VeniceClassic.ttf");
+        // let details = FontDetails {
+        //     path: font_path.clone(),
+        //     size: 19,
+        // };
+        self.font_manager.load(&self.font_details).unwrap();
+        self.music.play(-1).unwrap();
         let f = fs::read_to_string(level).expect("Could not load level!");
         let mut cury: i32 = 10;
         let mut temp_blocks: Vec<Tile> = Vec::new();
         let mut temp_eyes: Vec<Eye> = Vec::new();
+        
         for line in f.lines() {
             let mut curx: i32 = 10;
             for c in line.chars() {
@@ -263,7 +282,7 @@ impl<'a> Context<'a> {
                     });
                     self.player.x = curx + (TILE_WIDTH / 2) as i32 - (self.player.width / 2) as i32;
                     self.player.y =
-                        cury - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32;
+                        cury + 3 - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32;
                 }
                 curx += TILE_WIDTH as i32;
             }
@@ -275,6 +294,11 @@ impl<'a> Context<'a> {
         for eye in temp_eyes {
             self.eyes.push(eye);
         }
+
+        self.camera.minx = self.player.x + self.player.width as i32 / 2;
+        self.camera.maxx = self.player.x + self.player.width as i32 / 2;
+        self.camera.miny = self.player.y - self.player.height as i32 / 2;
+        self.camera.maxy = self.player.y - self.player.height as i32 / 2;
     }
 
     pub fn update(
