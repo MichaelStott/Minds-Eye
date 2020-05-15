@@ -37,7 +37,7 @@ impl State for GameState {
         // Update the player.
         context.player.update(&mut context.input);
         handle_collisions(&mut context.player, &mut context.tiles);
-        context.camera.focus(context.player.x - context.player.width as i32 / 2, context.player.y + context.player.height as i32 / 2);
+        context.camera.focus(context.player.x + context.player.width as i32 / 2, context.player.y + context.player.height as i32 / 2);
 
         // No state change has occured.
         None
@@ -104,11 +104,11 @@ impl State for GameState {
         canvas.present();
     }
 
-    fn on_enter(&mut self) {
+    fn on_enter(&mut self, context: &mut Context) {
 
     }
 
-    fn on_exit(&mut self) {}
+    fn on_exit(&mut self, context: &mut Context) {}
 
     fn get_name(&mut self) -> String {
         String::from("game")

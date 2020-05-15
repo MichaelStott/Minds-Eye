@@ -22,8 +22,8 @@ use std::fs;
 use std::path::Path;
 use std::rc::Rc;
 
-const TILE_WIDTH: u32 = 64;
-const TILE_HEIGHT: u32 = 64;
+pub const TILE_WIDTH: u32 = 64;
+pub const TILE_HEIGHT: u32 = 64;
 
 type TextureManager<'l, T> = ResourceManager<'l, String, Texture<'l>, TextureCreator<T>>;
 type FontManager<'l> = ResourceManager<'l, FontDetails, Font<'l, 'static>, Sdl2TtfContext>;
@@ -70,7 +70,7 @@ impl<'a> Context<'a> {
         //     size: 19,
         // };
         self.font_manager.load(&self.font_details).unwrap();
-        self.music.play(-1).unwrap();
+        //self.music.play(-1).unwrap();
         let f = fs::read_to_string(level).expect("Could not load level!");
         let mut cury: i32 = 10;
         let mut temp_blocks: Vec<Tile> = Vec::new();

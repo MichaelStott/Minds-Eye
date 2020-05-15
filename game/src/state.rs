@@ -7,9 +7,9 @@ pub trait State {
 
     fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas);
 
-    fn on_enter(&mut self);
+    fn on_enter(&mut self, context: &mut Context);
 
-    fn on_exit(&mut self);
+    fn on_exit(&mut self, context: &mut Context);
 
     fn get_name(&mut self) -> String;
 }

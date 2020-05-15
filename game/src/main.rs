@@ -23,19 +23,20 @@ use context::Context;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::mixer::{InitFlag, AUDIO_S16LSB, DEFAULT_CHANNELS};
-
+use sdl2::video::FullscreenType;
 use std::time::Duration;
 
 pub fn main() -> Result<(), String> {
     // Initialize SDL2 window.
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
-    let window = video_subsystem
+    let mut window = video_subsystem
         .window("Mind's Eye", 800, 600)
         .position_centered()
         .opengl()
         .build()
         .map_err(|e| e.to_string())?;
+    //window.set_fullscreen(FullscreenType::Desktop);
 
     // Initialize sound.
     let frequency = 44_100;
@@ -47,10 +48,10 @@ pub fn main() -> Result<(), String> {
         sdl2::mixer::init(InitFlag::MP3 | InitFlag::FLAC | InitFlag::MOD | InitFlag::OGG)?;
 
     // Set initial menu state.
-    let mut state: Box<dyn State> = Box::new(GameState {});
+    let mut state: Box<dyn State> = Box::new(StartMenuState { selected_option: 0});
     let mut events = sdl_context.event_pump()?;
     let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
-    state.on_enter();
+    
 
     // Initial context instantiation.
     let mut texture_creator = canvas.texture_creator();
@@ -58,10 +59,11 @@ pub fn main() -> Result<(), String> {
     let mut context = Context::new(&mut texture_creator, &mut font_context);
 
     // TODO: This should be handled in the game state....
-    context.load_level(String::from("res/levels/level4.txt"));
+    //context.load_level(String::from("res/levels/level1.txt"));
     context.camera.width = (canvas.output_size().unwrap().0) as i32;
     context.camera.height = (canvas.output_size().unwrap().1) as i32;
 
+    state.on_enter(&mut context);
     // Main game loop.
     'running: loop {
         // Check if the game loop should be exited.
@@ -80,9 +82,9 @@ pub fn main() -> Result<(), String> {
         context.draw(&mut *state, &mut canvas);
         match new_state {
             Some(x) => {
-                state.on_exit();
+                state.on_exit(&mut context);
                 state = x;
-                state.on_enter();
+                state.on_enter(&mut context);
             }
             None => {
                 // No state change has occurred.
