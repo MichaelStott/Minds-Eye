@@ -13,7 +13,7 @@ An experimental Sokoban-esque puzzle game developed using Rust and SDL2.
 
 ## Build
 
-Install the SDL2 libraries for your environment.
+Install the SDL2 developer dependencies for your environment.
 
 ```bash
 sudo apt install libsdl2-dev libsdl2-2.0-0 -y
