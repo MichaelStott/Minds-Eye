@@ -4,6 +4,7 @@ use crate::state::State;
 
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
+use sdl2::keyboard::Keycode;
 
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -15,6 +16,10 @@ pub struct GameState {
 
 impl State for GameState {
     fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>> {
+        if context.input.key_just_pressed(&Keycode::R) {
+            context.load_level(String::from("res/levels/level2.txt"));
+        }
+
         // TODO: Refactor this.
         let new_tiles = &mut context.tiles.to_vec();
         for tile in context.tiles.iter_mut() {
@@ -36,7 +41,7 @@ impl State for GameState {
 
         // Update the player.
         context.player.update(&mut context.input);
-        handle_collisions(&mut context.player, &mut context.tiles);
+        handle_collisions(&mut context.player, &mut context.tiles, &context.move_fx);
         context.camera.focus(context.player.x + context.player.width as i32 / 2, context.player.y + context.player.height as i32 / 2);
 
         // No state change has occured.
@@ -65,7 +70,7 @@ impl State for GameState {
         }
         context
             .player
-            .draw(&tex_player, &tex_shadow, &mut context.camera, canvas);
+            .draw_shadow(&tex_shadow, &mut context.camera, canvas);
         for tile in &mut context.tiles {
             if tile.isblock || tile.iswall {
                 tile.draw(
@@ -101,11 +106,12 @@ impl State for GameState {
                 canvas,
             );
         }
+        context.player.draw(&tex_player, &mut context.camera, canvas);
         canvas.present();
     }
-
+    
     fn on_enter(&mut self, context: &mut Context) {
-
+        context.load_level(String::from("res/levels/level2.txt"));
     }
 
     fn on_exit(&mut self, context: &mut Context) {}

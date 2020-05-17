@@ -46,20 +46,21 @@ pub fn main() -> Result<(), String> {
     sdl2::mixer::open_audio(frequency, format, channels, chunk_size)?;
     let _mixer_context =
         sdl2::mixer::init(InitFlag::MP3 | InitFlag::FLAC | InitFlag::MOD | InitFlag::OGG)?;
-
+    sdl2::mixer::allocate_channels(6);
+    
     // Set initial menu state.
-    let mut state: Box<dyn State> = Box::new(StartMenuState { selected_option: 0});
+    let mut state: Box<dyn State> = Box::new(StartMenuState {selected_option: 0});
     let mut events = sdl_context.event_pump()?;
     let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
-    
 
     // Initial context instantiation.
     let mut texture_creator = canvas.texture_creator();
     let mut font_context= sdl2::ttf::init().unwrap();
     let mut context = Context::new(&mut texture_creator, &mut font_context);
+    context.music.play(-1).unwrap();
+    context.move_fx.set_volume(50);
 
     // TODO: This should be handled in the game state....
-    //context.load_level(String::from("res/levels/level1.txt"));
     context.camera.width = (canvas.output_size().unwrap().0) as i32;
     context.camera.height = (canvas.output_size().unwrap().1) as i32;
 
@@ -83,8 +84,10 @@ pub fn main() -> Result<(), String> {
         match new_state {
             Some(x) => {
                 state.on_exit(&mut context);
+                println!("Exiting state: {}", state.get_name());
                 state = x;
                 state.on_enter(&mut context);
+                println!("Entering state: {}", state.get_name());
             }
             None => {
                 // No state change has occurred.

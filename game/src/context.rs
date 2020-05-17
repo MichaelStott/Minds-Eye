@@ -1,3 +1,4 @@
+use sdl2::mixer::Chunk;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::ttf::Font;
 use crate::camera::Camera;
@@ -39,6 +40,9 @@ pub struct Context<'a> {
     pub input: InputHandler,
     pub music: Music<'a>,
     pub socket_tex: Texture<'a>,
+    pub move_fx: Chunk,
+    pub select_fx: Chunk,
+    pub enter_fx: Chunk,
     pub texture_manager: TextureManager<'a, WindowContext>,
     pub font_manager: FontManager<'a>,
     pub font_details: FontDetails,
@@ -56,26 +60,24 @@ impl<'a> Context<'a> {
             input: InputHandler::new(),
             texture_manager: TextureManager::new(&texture_creator),
             socket_tex: texture_creator.load_texture(Path::new("res/img/socket.png")).unwrap(),
+            move_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/push.ogg")).unwrap(),
+            select_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/select.ogg")).unwrap(),
+            enter_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/enter.ogg")).unwrap(),
             music: sdl2::mixer::Music::from_file(Path::new("res/sound/laidback.mp3")).unwrap(),
             font_manager: FontManager::new(ttf_context),
             font_details: FontDetails { path: String::from("res/fonts/VeniceClassic.ttf"), size: 19},
         }
     }
 
-    pub fn load_level(&mut self, level: String) {
-        //let mut font = ttf_context.load_font(Path::new("res/font/VeniceClassic.ttf"), 19).unwrap();
-        // let font_path = String::from("res/font/VeniceClassic.ttf");
-        // let details = FontDetails {
-        //     path: font_path.clone(),
-        //     size: 19,
-        // };
+    pub fn load_level(&mut self, level: String) {       
         self.font_manager.load(&self.font_details).unwrap();
-        //self.music.play(-1).unwrap();
         let f = fs::read_to_string(level).expect("Could not load level!");
         let mut cury: i32 = 10;
         let mut temp_blocks: Vec<Tile> = Vec::new();
         let mut temp_eyes: Vec<Eye> = Vec::new();
-        
+        self.tiles.clear();
+        self.eyes.clear();
+        self.player = Player::new();
         for line in f.lines() {
             let mut curx: i32 = 10;
             for c in line.chars() {

@@ -144,16 +144,12 @@ impl Player {
         self.y += dy;
     }
 
-    pub fn draw(
-        &mut self,
+    pub fn draw_shadow(&mut self,
         texture: &Texture,
-        shadowTexture: &Texture,
         camera: &mut Camera,
-        canvas: &mut WindowCanvas,
-    ) {
-        // Old Drop Shadow
+        canvas: &mut WindowCanvas) {
         canvas.copy(
-            shadowTexture,
+            texture,
             Rect::new(0, 0, self.width, self.width),
             Rect::new(
                 self.x - camera.x,
@@ -161,7 +157,15 @@ impl Player {
                 self.width,
                 self.height,
             ),
-        );
+        ).unwrap();
+    }
+
+    pub fn draw(
+        &mut self,
+        texture: &Texture,
+        camera: &mut Camera,
+        canvas: &mut WindowCanvas,
+    ) {
         canvas.set_draw_color(Color::RGB(0, 220, 0));
         canvas
             .copy_ex(

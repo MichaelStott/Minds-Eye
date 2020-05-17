@@ -1,19 +1,20 @@
+use sdl2::mixer::Chunk;
 use crate::player::Player;
 use crate::tile::Tile;
 
-pub fn handle_collisions(player: &mut Player, tiles: &mut Vec<Tile>) {
-    handle_collision_x(player, tiles);
-    handle_collision_y(player, tiles);
+pub fn handle_collisions(player: &mut Player, tiles: &mut Vec<Tile>, move_fx: &Chunk) {
+    handle_collision_x(player, tiles, move_fx);
+    handle_collision_y(player, tiles, move_fx);
 }
 
 pub fn does_intersect(player: &mut Player, tile: &mut Tile) -> bool {
     (player.x < tile.x + tile.width as i32)
         && (player.x + player.width as i32 > tile.x)
-        && (player.y < tile.y + tile.height as i32)
+        && (player.y + 25 < tile.y + tile.height as i32)
         && (player.y + player.height as i32 > tile.y)
 }
 
-fn handle_collision_x(player: &mut Player, tiles: &mut Vec<Tile>) {
+fn handle_collision_x(player: &mut Player, tiles: &mut Vec<Tile>, move_fx: &Chunk) {
     if player.velx != 0 {
         player.move_player(player.velx, 0);
         for tile in tiles {
@@ -25,6 +26,8 @@ fn handle_collision_x(player: &mut Player, tiles: &mut Vec<Tile>) {
                             tile.targetx = dir * -1 * tile.width as i32 + tile.x;
                             tile.resistancex = 30;
                             tile.resistancey = 30;
+                            let channel = sdl2::mixer::channel(0);
+                            channel.play(&move_fx, 0);
                         } else {
                             tile.resistancex -= 1;
                         }
@@ -43,7 +46,7 @@ fn handle_collision_x(player: &mut Player, tiles: &mut Vec<Tile>) {
     }
 }
 
-fn handle_collision_y(player: &mut Player, tiles: &mut Vec<Tile>) {
+fn handle_collision_y(player: &mut Player, tiles: &mut Vec<Tile>, move_fx: &Chunk) {
     if player.vely != 0 {
         player.move_player(0, player.vely);
         for tile in tiles {
@@ -55,12 +58,14 @@ fn handle_collision_y(player: &mut Player, tiles: &mut Vec<Tile>) {
                             tile.targety = dir * -1 * tile.height as i32 + tile.y;
                             tile.resistancex = 30;
                             tile.resistancey = 30;
+                            let channel = sdl2::mixer::channel(0);
+                            channel.play(&move_fx, 0);
                         } else {
                             tile.resistancey -= 1;
                         }
                     }
                     player.y = if dir == 1 {
-                        tile.y + tile.height as i32
+                        tile.y - 25  + tile.height as i32
                     } else {
                         tile.y - player.height as i32
                     };
