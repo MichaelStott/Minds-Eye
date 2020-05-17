@@ -3,5 +3,5 @@
 A Sokoban-esque puzzle game developed in Rust.
 
 <p align="center">
-  <img src="res/preview.gif">
+  <img src="preview/preview.gif">
 </p>
