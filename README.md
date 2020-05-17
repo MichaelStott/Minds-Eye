@@ -32,4 +32,4 @@ $ cargo run
 
 ## Credits
 
-Music composed by [Keving Macleoud](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100181).
+Music composed by [Kevin Macleoud](https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100181).
