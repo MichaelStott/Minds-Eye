@@ -5,6 +5,8 @@
 
 ------
 
+[WIP]
+
 An experimental Sokoban-esque puzzle game developed using Rust and SDL2.
 
 <p align="center">
