@@ -1,3 +1,4 @@
+use crate::level_select_state::LevelSelectState;
 use crate::tile::Tile;
 use crate::context::TILE_HEIGHT;
 use crate::context::TILE_WIDTH;
@@ -10,6 +11,8 @@ use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use sdl2::rect::Rect;
 use sdl2::keyboard::Keycode;
+
+use std::collections::HashMap;
 
 pub struct StartMenuState {
     pub selected_option: u32,
@@ -87,6 +90,7 @@ impl State for StartMenuState {
             let channel = sdl2::mixer::channel(2);
             channel.play(&context.enter_fx, 0);
             if self.selected_option == 0 {
+               //return Some(Box::new(LevelSelectState {levels: HashMap::new(), options: Vec::new()}))
                return Some(Box::new(GameState {}))
             }
         }
@@ -95,7 +99,8 @@ impl State for StartMenuState {
     }
 
     /**
-     * TODO: Implement better string rendering logic.
+     * TODO: Implement better string rendering logic. Below will create a new
+     * texture for the strings every frame.
      */
     fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
         canvas.set_draw_color(Color::RGB(0, 0, 0));
@@ -106,7 +111,7 @@ impl State for StartMenuState {
         // Render the title.
         let title = font.render("Mind's Eye").blended(Color::RGBA(255, 255, 255, 255)).unwrap();
         let title_tex = texture_creator.create_texture_from_surface(&title).unwrap();
-        canvas.copy(&title_tex, None, Rect::new(context.camera.width / 2 - 200, 30,400,76)).unwrap();
+        canvas.copy(&title_tex, None, Rect::new(context.camera.width / 2 - 4 * title.size().0 as i32 / 2, 30, title.size().0 * 4,  title.size().1 * 4)).unwrap();
 
          // Render selector box.
         let color = if self.selected_option == 0 {
@@ -146,17 +151,17 @@ impl State for StartMenuState {
             )).unwrap();
 
         // Render the options.
-        let title = font.render("Play").blended(Color::RGBA(255, 255, 255, 255)).unwrap();
-        let title_tex = texture_creator.create_texture_from_surface(&title).unwrap();
-        canvas.copy(&title_tex, None, Rect::new(context.camera.width / 2 - 50, 200, 100, 57)).unwrap();
+        let play = font.render("Play").blended(Color::RGBA(255, 255, 255, 255)).unwrap();
+        let play_tex = texture_creator.create_texture_from_surface(&play).unwrap();
+        canvas.copy(&play_tex, None, Rect::new(context.camera.width / 2 - play.size().0 as i32 * 3 / 2, 200,  play.size().0 * 3,  play.size().1 * 3)).unwrap();
 
-        let title = font.render("Help").blended(Color::RGBA(255, 255, 255, 255)).unwrap();
-        let title_tex = texture_creator.create_texture_from_surface(&title).unwrap();
-        canvas.copy(&title_tex, None, Rect::new(context.camera.width / 2 - 45, 300, 100, 57)).unwrap();
+        let help = font.render("Help").blended(Color::RGBA(255, 255, 255, 255)).unwrap();
+        let help_tex = texture_creator.create_texture_from_surface(&help).unwrap();
+        canvas.copy(&help_tex, None, Rect::new(context.camera.width / 2 - help.size().0 as i32 * 3 / 2, 300,  help.size().0 * 3,  help.size().1 * 3)).unwrap();
 
-        let title = font.render("Credits").blended(Color::RGBA(255, 255, 255, 255)).unwrap();
-        let title_tex = texture_creator.create_texture_from_surface(&title).unwrap();
-        canvas.copy(&title_tex, None, Rect::new(context.camera.width / 2 - 78, 400, 165, 57)).unwrap();
+        let credits = font.render("Credits").blended(Color::RGBA(255, 255, 255, 255)).unwrap();
+        let credits_tex = texture_creator.create_texture_from_surface(&credits).unwrap();
+        canvas.copy(&credits_tex, None, Rect::new(context.camera.width / 2 - credits.size().0 as i32 * 3 / 2, 400,  credits.size().0 * 3,  credits.size().1 * 3)).unwrap();
 
         // Render menu eyes.
         for eye in context.eyes.iter_mut() {
@@ -246,6 +251,6 @@ impl State for StartMenuState {
     }
 
     fn get_name(&mut self) -> String {
-        String::from("start")
+        String::from("start_menu")
     }
 }

@@ -23,7 +23,7 @@ impl State for GameState {
         // TODO: Refactor this.
         let new_tiles = &mut context.tiles.to_vec();
         for tile in context.tiles.iter_mut() {
-            tile.update(new_tiles);
+            tile.update(new_tiles, &context.move_fx);
         }
 
         // Check if the puzzle has been solved.
@@ -111,7 +111,7 @@ impl State for GameState {
     }
     
     fn on_enter(&mut self, context: &mut Context) {
-        context.load_level(String::from("res/levels/level2.txt"));
+        context.load_level(String::from("res/levels/level5.txt"));
     }
 
     fn on_exit(&mut self, context: &mut Context) {}

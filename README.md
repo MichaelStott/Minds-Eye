@@ -5,8 +5,6 @@
 
 ------
 
-[WIP]
-
 An experimental Sokoban-esque puzzle game developed using Rust and SDL2.
 
 <p align="center">
@@ -17,6 +15,7 @@ An experimental Sokoban-esque puzzle game developed using Rust and SDL2.
 
 Install the SDL2 developer dependencies. The following is for an Ubuntu environment.
 
+### Ubuntu Installation
 ```
 $ sudo apt install libsdl2-dev libsdl2-2.0-0 -y
 $ sudo apt install libjpeg9-dev libwebp-dev libtiff5-dev libsdl2-image-dev libsdl2-image-2.0-0 -y

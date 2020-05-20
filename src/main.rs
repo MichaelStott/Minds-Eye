@@ -11,6 +11,7 @@ mod player;
 mod resource_manager;
 mod settings;
 mod start_menu_state;
+mod level_select_state;
 mod state;
 mod tile;
 
@@ -84,10 +85,8 @@ pub fn main() -> Result<(), String> {
         match new_state {
             Some(x) => {
                 state.on_exit(&mut context);
-                println!("Exiting state: {}", state.get_name());
                 state = x;
                 state.on_enter(&mut context);
-                println!("Entering state: {}", state.get_name());
             }
             None => {
                 // No state change has occurred.

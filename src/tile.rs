@@ -1,3 +1,4 @@
+use sdl2::mixer::Chunk;
 use crate::camera::Camera;
 use crate::settings;
 
@@ -24,41 +25,52 @@ pub struct Tile {
 }
 
 impl Tile {
-    pub fn update(&mut self, tiles: &Vec<Tile>) {
+    pub fn update(&mut self, tiles: &Vec<Tile>, move_fx: &Chunk) {
         let prevx = self.x;
         let prevy = self.y;
+        let delta = 3;
         if self.targetx != self.x {
             let dir = (self.targetx - self.x) / (self.targetx - self.x).abs();
-            let delta = 3;
             self.x = if dir * (self.x + delta * dir) > dir * self.targetx {
                 self.targetx
             } else {
                 self.x + delta * dir
             };
         }
+        let mut intersected = false;
         for tile in tiles {
             if (tile.iswall || tile.isblock) && !(prevx == tile.x && prevy == tile.y) && does_intersect(tile, self) {
                 self.x = prevx;
                 self.resistancex = 30;
                 self.targetx = self.x;
+                intersected = true;
             }
         }
+        if !intersected && (self.targetx - self.x).abs() == self.width as i32 - delta {
+            let channel = sdl2::mixer::channel(0);
+            channel.play(&move_fx, 0);
+        }
+
         if self.targety != self.y {
             let dir = (self.targety - self.y) / (self.targety - self.y).abs();
-            let delta = 3;
-
             self.y = if dir * (self.y + delta * dir) > dir * self.targety {
                 self.targety
             } else {
                 self.y + delta * dir
             };
         }
+        intersected = false;
         for tile in tiles {
             if (tile.iswall || tile.isblock) && !(prevx == tile.x && prevy == tile.y) && does_intersect(tile, self) {
                 self.y = prevy;
                 self.resistancey = 30;
                 self.targety = self.y;
+                intersected = true;
             }
+        }
+        if !intersected && (self.targety - self.y).abs() == self.height as i32 - delta {
+            let channel = sdl2::mixer::channel(0);
+            channel.play(&move_fx, 0);
         }
     }
 

@@ -78,7 +78,12 @@ impl<'a> Context<'a> {
         self.tiles.clear();
         self.eyes.clear();
         self.player = Player::new();
+        let mut skip = true;
         for line in f.lines() {
+            if skip {
+                skip = false;
+                continue;
+            }
             let mut curx: i32 = 10;
             for c in line.chars() {
                 if c == '*' {
