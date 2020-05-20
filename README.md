@@ -11,6 +11,8 @@ An experimental Sokoban-esque puzzle game developed using Rust and SDL2. Very mu
   <img src="preview/preview.gif" height="333" width="333">
 </p>
 
+The objective is to move the colored blocks into the line of sight of a matching eye.
+
 ## Build
 
 Install the SDL2 dependencies for your environment.
