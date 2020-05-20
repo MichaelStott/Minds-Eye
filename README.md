@@ -28,7 +28,8 @@ $ sudo apt install libfreetype6-dev libsdl2-ttf-dev libsdl2-ttf-2.0-0 -y
 Then build and execute the game with the following:
 
 ```
-$ cargo run 
+$ cargo build --release
+$ ./target/release/game
 ```
 
 ## Credits
