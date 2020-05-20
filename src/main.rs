@@ -12,6 +12,8 @@ mod resource_manager;
 mod settings;
 mod start_menu_state;
 mod level_select_state;
+mod help_state;
+mod credits_state;
 mod state;
 mod tile;
 

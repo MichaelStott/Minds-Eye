@@ -1,3 +1,5 @@
+use crate::credits_state::CreditsState;
+use crate::help_state::HelpState;
 use crate::level_select_state::LevelSelectState;
 use crate::tile::Tile;
 use crate::context::TILE_HEIGHT;
@@ -90,8 +92,11 @@ impl State for StartMenuState {
             let channel = sdl2::mixer::channel(2);
             channel.play(&context.enter_fx, 0);
             if self.selected_option == 0 {
-               //return Some(Box::new(LevelSelectState {levels: HashMap::new(), options: Vec::new()}))
-               return Some(Box::new(GameState {}))
+               return Some(Box::new(LevelSelectState {levels: HashMap::new(), options: Vec::new(), selected_option: 0}))
+            } else if self.selected_option == 1 {
+                return Some(Box::new(HelpState {}))
+            } else if self.selected_option == 2 {
+                return Some(Box::new(CreditsState {}))
             }
         }
 
@@ -230,19 +235,51 @@ impl State for StartMenuState {
             deltay: 0,
             anger: 0,
         });
-        context.tiles.push(Tile {
-            texture: String::from("res/img/blueblock.png"),
-            width: TILE_WIDTH,
-            height: TILE_HEIGHT,
-            x: 200,
-            y: 200,
-            targetx: 200,
-            targety: 200,
-            resistancex: 30,
-            resistancey: 30,
-            iswall: false,
-            isblock: true,
-        });
+        if self.selected_option == 0 {
+            context.tiles.push(Tile {
+                texture: String::from("res/img/blueblock.png"),
+                width: TILE_WIDTH,
+                height: TILE_HEIGHT,
+                x: 200,
+                y: 200,
+                targetx: 200,
+                targety: 200,
+                resistancex: 30,
+                resistancey: 30,
+                iswall: false,
+                isblock: true,
+            });
+        } else if self.selected_option == 1 {
+            context.tiles.push(Tile {
+                texture: String::from("res/img/greenblock.png"),
+                width: TILE_WIDTH,
+                height: TILE_HEIGHT,
+                x: 200,
+                y: 300,
+                targetx: 200,
+                targety: 500,
+                resistancex: 30,
+                resistancey: 30,
+                iswall: false,
+                isblock: true,
+            });
+        } else if self.selected_option == 2 {
+            context.tiles.push(Tile {
+                texture: String::from("res/img/redblock.png"),
+                width: TILE_WIDTH,
+                height: TILE_HEIGHT,
+                x: context.camera.width / 2 - 32,
+                y: 200,
+                targetx: 200,
+                targety: 200,
+                resistancex: 30,
+                resistancey: 30,
+                iswall: false,
+                isblock: true,
+            });
+        }
+        context.camera.x = 0;
+        context.camera.y = 0;
     }
 
     fn on_exit(&mut self, context: &mut Context) {

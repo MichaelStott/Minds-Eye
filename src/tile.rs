@@ -100,6 +100,10 @@ impl Tile {
                 .unwrap();
         }
     }
+
+    pub fn has_moved(&mut self) -> bool {
+        (self.targety - self.y).abs() == self.height as i32  || (self.targetx - self.x).abs() == self.width as i32
+    }
 }
 
 pub fn does_intersect(player: &Tile, tile: &Tile) -> bool {
@@ -108,3 +112,4 @@ pub fn does_intersect(player: &Tile, tile: &Tile) -> bool {
         && (player.y < tile.y + tile.height as i32)
         && (player.y + player.height as i32 > tile.y)
 }
+
