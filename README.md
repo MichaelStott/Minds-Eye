@@ -15,7 +15,7 @@ The objective is to move the colored blocks into the line of sight of a matching
 
 ## Build
 
-Install the SDL2 dependencies for your environment.
+Install the SDL2 dev dependencies for your environment.
 
 ### Ubuntu SDL2 Installation
 ```
