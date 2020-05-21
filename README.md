@@ -5,15 +5,17 @@
 
 ------
 
-An experimental Sokoban-esque puzzle game developed using Rust and SDL2.
+An experimental Sokoban-esque puzzle game developed using Rust and SDL2. Very much a WIP. :construction_worker:
 
 <p align="center">
   <img src="preview/preview.gif" height="333" width="333">
 </p>
 
+The objective is to move the colored blocks into the line of sight of a matching eye.
+
 ## Build
 
-Install the SDL2 dependencies for your environment.
+Install the SDL2 dev dependencies for your environment.
 
 ### Ubuntu SDL2 Installation
 ```
@@ -26,7 +28,8 @@ $ sudo apt install libfreetype6-dev libsdl2-ttf-dev libsdl2-ttf-2.0-0 -y
 Then build and execute the game with the following:
 
 ```
-$ cargo run 
+$ cargo build --release
+$ ./target/release/game
 ```
 
 ## Credits
