@@ -1,9 +1,9 @@
 Level 4: Mostly Solved
 xxxxBxxxxxGxxxx
-x*x***x*x***x*x
+x*x**xx*xx**x*x
 x**x*x***x*x**x
 B***b**R**g**Gx
 x**x*x*p*x*x**x
-x*x*r*xbx***x*x
+x*x*rxxbxx**x*x
 x*************x
 xxxxxxxxxxGxxxx
