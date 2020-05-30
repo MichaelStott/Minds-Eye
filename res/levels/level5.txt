@@ -1,8 +1,8 @@
 Level 5: Mind's Eye
     xxxxxx
-  xx*G**G*xx
- x**x*b**x**x
-Bp**r********B
- x**x**g*x**x
-  xx*R**R*xx
+  xx6Gx*6Gx6xx
+ x*6x*b**6x*6x
+Bxp***r********6Bx
+ x*6x**g*6x*6x
+  xx6Rx*6Rx6xx
     xxxxxx

@@ -26,6 +26,8 @@ use std::rc::Rc;
 pub const TILE_WIDTH: u32 = 64;
 pub const TILE_HEIGHT: u32 = 64;
 
+pub const TILE_CHARS: [char; 6] = ['*', '5', '5', '6', '8', '9'];
+
 type TextureManager<'l, T> = ResourceManager<'l, String, Texture<'l>, TextureCreator<T>>;
 type FontManager<'l> = ResourceManager<'l, FontDetails, Font<'l, 'static>, Sdl2TtfContext>;
 
@@ -71,6 +73,21 @@ impl<'a> Context<'a> {
         }
     }
 
+    fn get_texture_name(tile: char) -> String {
+        if tile == '8' {
+            return String::from("res/img/dbg_floor_shadow_top.png");
+        } else if tile == '9' {
+            return String::from("res/img/dbg_floor_shadow_ne_corner.png");
+        } else if tile == '6' {
+            return String::from("res/img/dbg_floor_shadow_right.png");
+        } else if tile == '5' {
+            return String::from("res/img/dbg_floor_shadow_corner.png");
+        } else if tile == '*' {
+            return String::from("res/img/dbg_floor.png");
+        }
+        String::from("res/img/dbg_floor.png")
+    }
+
     pub fn load_level(&mut self, level: String) {       
         self.font_manager.load(&self.font_details).unwrap();
         let f = fs::read_to_string(level).expect("Could not load level!");
@@ -83,14 +100,15 @@ impl<'a> Context<'a> {
         let mut skip = true;
         for line in f.lines() {
             if skip {
+                // Skip the first line of the file.
                 skip = false;
                 continue;
             }
             let mut curx: i32 = 10;
             for c in line.chars() {
-                if c == '*' {
+                if TILE_CHARS.contains(&c) {
                     self.tiles.push(Tile {
-                        texture: String::from("res/img/dbg_floor.png"),
+                        texture: Context::get_texture_name(c),
                         width: TILE_WIDTH,
                         height: TILE_HEIGHT,
                         x: curx,
@@ -102,6 +120,7 @@ impl<'a> Context<'a> {
                         iswall: false,
                         isblock: false,
                     });
+                    curx += TILE_WIDTH as i32;
                 } else if c == 'x' {
                     self.tiles.push(Tile {
                         texture: String::from("res/img/grayblock.png"),
@@ -116,20 +135,8 @@ impl<'a> Context<'a> {
                         iswall: true,
                         isblock: false,
                     });
+                    curx += TILE_WIDTH as i32;
                 } else if c == 'b' {
-                    self.tiles.push(Tile {
-                        texture: String::from("res/img/dbg_floor.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
-                        iswall: false,
-                        isblock: false,
-                    });
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/blueblock.png"),
                         width: TILE_WIDTH,
@@ -144,19 +151,6 @@ impl<'a> Context<'a> {
                         isblock: true,
                     });
                 } else if c == 'g' {
-                    self.tiles.push(Tile {
-                        texture: String::from("res/img/dbg_floor.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
-                        iswall: false,
-                        isblock: false,
-                    });
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/greenblock.png"),
                         width: TILE_WIDTH,
@@ -171,19 +165,6 @@ impl<'a> Context<'a> {
                         isblock: true,
                     });
                 } else if c == 'r' {
-                    self.tiles.push(Tile {
-                        texture: String::from("res/img/dbg_floor.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
-                        iswall: false,
-                        isblock: false,
-                    });
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/redblock.png"),
                         width: TILE_WIDTH,
@@ -198,19 +179,6 @@ impl<'a> Context<'a> {
                         isblock: true,
                     });
                 } else if c == 'B' {
-                    self.tiles.push(Tile {
-                        texture: String::from("res/img/grayblock.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
-                        iswall: true,
-                        isblock: false,
-                    });
                     temp_eyes.push(Eye {
                         direction: String::from("left"),
                         x: curx,
@@ -224,19 +192,6 @@ impl<'a> Context<'a> {
                         anger: 0,
                     });
                 } else if c == 'R' {
-                    self.tiles.push(Tile {
-                        texture: String::from("res/img/grayblock.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
-                        iswall: true,
-                        isblock: false,
-                    });
                     temp_eyes.push(Eye {
                         direction: String::from("left"),
                         x: curx,
@@ -250,19 +205,6 @@ impl<'a> Context<'a> {
                         anger: 0,
                     });
                 } else if c == 'G' {
-                    self.tiles.push(Tile {
-                        texture: String::from("res/img/grayblock.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
-                        iswall: true,
-                        isblock: false,
-                    });
                     temp_eyes.push(Eye {
                         direction: String::from("left"),
                         x: curx,
@@ -276,24 +218,12 @@ impl<'a> Context<'a> {
                         anger: 0,
                     });
                 } else if c == 'p' {
-                    self.tiles.push(Tile {
-                        texture: String::from("res/img/dbg_floor.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
-                        iswall: false,
-                        isblock: false,
-                    });
                     self.player.x = curx + (TILE_WIDTH / 2) as i32 - (self.player.width / 2) as i32;
                     self.player.y =
                         cury + 3 - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32;
+                } else if c == ' ' {
+                    curx += TILE_WIDTH as i32;
                 }
-                curx += TILE_WIDTH as i32;
             }
             cury += TILE_HEIGHT as i32;
         }

@@ -1,12 +1,12 @@
 Level 1: An Easy One
-           B
-    xxxxx BbB
-    x*B*x  B
-    xb*rx 
- G  x***x  
-GgG xxgxx
- G  x***x   
-    x*p*x  
-    x***x  R 
-    xxxxx RrR
-           R
+           Bx
+    xxxxx Bxb*Bx
+    x6Bx6x  Bx
+    xb**r6x 
+ Gx  x**6x  
+Gxg*Gx xxg6xx
+ Gx  x**6x   
+    x*p*6x  
+    x**6x  Rx 
+    xxxxx Rxr*Rx
+           Rx
