@@ -52,7 +52,7 @@ impl State for GameState {
              // Update the player.
             context.player.update(&mut context.input);
             handle_collisions(&mut context.player, &mut context.tiles, &context.move_fx);
-            //context.camera.focus(context.player.x + context.player.width as i32 / 2, context.player.y + context.player.height as i32 / 2);
+            context.camera.focus(context.player.x + context.player.width as i32 / 2, context.player.y + context.player.height as i32 / 2);
         } else {
             if self.time_str == "" {
                 let elapsed_time = self.time.elapsed().as_secs();
@@ -127,7 +127,7 @@ impl State for GameState {
         }
         context.player.draw(&tex_player, &mut context.camera, canvas);
 
-        if self.won && false {
+        if self.won {
             canvas.set_draw_color(Color::RGBA(0, 0, 0, 150));
             canvas.set_blend_mode(BlendMode::Blend);
             canvas.fill_rect(Rect::new(0, 0, context.camera.width as u32, context.camera.height as u32)).unwrap();

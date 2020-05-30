@@ -60,7 +60,7 @@ pub fn main() -> Result<(), String> {
     let mut texture_creator = canvas.texture_creator();
     let mut font_context= sdl2::ttf::init().unwrap();
     let mut context = Context::new(&mut texture_creator, &mut font_context);
-    //context.music.play(-1).unwrap();
+    context.music.play(-1).unwrap();
     context.move_fx.set_volume(50);
 
     // TODO: This should be handled in the game state....
