@@ -16,10 +16,9 @@ mod help_state;
 mod credits_state;
 mod state;
 mod tile;
-
+mod fire;
 
 use crate::start_menu_state::StartMenuState;
-use crate::game_state::GameState;
 use crate::state::State;
 use context::Context;
 

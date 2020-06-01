@@ -31,6 +31,10 @@ impl State for GameState {
             return Some(Box::new(LevelSelectState {levels: HashMap::new(), options: Vec::new(), selected_option: 0}))
         }
 
+        for fire in context.flames.iter_mut() {
+            fire.update();
+        }
+
         // TODO: Refactor this.
         let new_tiles = &mut context.tiles.to_vec();
         for tile in context.tiles.iter_mut() {
@@ -126,7 +130,14 @@ impl State for GameState {
             );
         }
         context.player.draw(&tex_player, &mut context.camera, canvas);
-
+        let tex_fire = context.texture_manager.load("res/img/fire2.png").unwrap();
+        let tex_glow = context.texture_manager.load("res/img/fire_glow.png").unwrap();
+        for fire in context.flames.iter_mut() {
+            fire.draw(&tex_fire,
+                &tex_glow,
+                &mut context.camera,
+                canvas,)
+        }
         if self.won {
             canvas.set_draw_color(Color::RGBA(0, 0, 0, 150));
             canvas.set_blend_mode(BlendMode::Blend);
@@ -162,7 +173,9 @@ impl State for GameState {
         self.time = Instant::now();
     }
 
-    fn on_exit(&mut self, context: &mut Context) {}
+    fn on_exit(&mut self, context: &mut Context) {
+        context.flames.clear();
+    }
 
     fn get_name(&mut self) -> String {
         String::from("game")

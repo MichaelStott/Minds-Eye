@@ -166,7 +166,6 @@ impl Player {
         camera: &mut Camera,
         canvas: &mut WindowCanvas,
     ) {
-        canvas.set_draw_color(Color::RGB(0, 220, 0));
         canvas
             .copy_ex(
                 &texture,

@@ -1,3 +1,4 @@
+use crate::fire::Fire;
 use sdl2::mixer::Chunk;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::ttf::Font;
@@ -33,6 +34,7 @@ type FontManager<'l> = ResourceManager<'l, FontDetails, Font<'l, 'static>, Sdl2T
 
 /// Contains all globally shared game data.
 pub struct Context<'a> {
+    pub flames: Vec<Fire>,
     pub tiles: Vec<Tile>,
     pub blocks: Vec<Tile>,
     pub eyes: Vec<Eye>,
@@ -54,6 +56,7 @@ pub struct Context<'a> {
 impl<'a> Context<'a> {
     pub fn new(texture_creator: &'a TextureCreator<WindowContext>, ttf_context: &'a Sdl2TtfContext) -> Self {
         Context {
+            flames: Vec::new(),
             tiles: Vec::new(),
             blocks: Vec::new(),
             eyes: Vec::new(),
@@ -118,6 +121,25 @@ impl<'a> Context<'a> {
                         resistancex: 0,
                         resistancey: 0,
                         iswall: false,
+                        isblock: false,
+                    });
+                    curx += TILE_WIDTH as i32;
+                } else if c == 'f' {
+                    let mut flame = Fire::new();
+                    flame.x = curx + TILE_WIDTH as i32 / 2 - flame.width as i32/ 2;
+                    flame.y = cury;
+                    self.flames.push(flame);
+                    self.tiles.push(Tile {
+                        texture: String::from("res/img/torch.png"),
+                        width: TILE_WIDTH,
+                        height: TILE_HEIGHT,
+                        x: curx,
+                        y: cury,
+                        targetx: curx,
+                        targety: cury,
+                        resistancex: 0,
+                        resistancey: 0,
+                        iswall: true,
                         isblock: false,
                     });
                     curx += TILE_WIDTH as i32;
