@@ -8,7 +8,7 @@
 An experimental Sokoban-esque puzzle game developed using Rust and SDL2. Very much a WIP. :construction_worker:
 
 <p align="center">
-  <img src="preview/preview.gif" height="333" width="333">
+  <img src="preview/preview.gif">
 </p>
 
 The objective is to move the colored blocks into the line of sight of a matching eye.
