@@ -1,9 +1,9 @@
 extern crate sdl2;
 
+mod texture_manager;
 mod camera;
 mod context;
 mod eye;
-
 mod game_state;
 mod input_handler;
 mod physics;
@@ -27,39 +27,40 @@ use sdl2::keyboard::Keycode;
 use sdl2::mixer::{InitFlag, AUDIO_S16LSB, DEFAULT_CHANNELS};
 use sdl2::video::FullscreenType;
 use std::time::Duration;
+use std::process;
 
 pub fn main() -> Result<(), String> {
     // Initialize SDL2 window.
-    let sdl_context = sdl2::init()?;
-    let video_subsystem = sdl_context.video()?;
+    let sdl_context = sdl2::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
     let mut window = video_subsystem
         .window("Mind's Eye", 800, 600)
         .position_centered()
-        .opengl()
         .build()
-        .map_err(|e| e.to_string())?;
-    //window.set_fullscreen(FullscreenType::Desktop);
+        .map_err(|e| e.to_string()).unwrap();
+    //window.set_fullscreen(FullscreenType::True).unwrap();
 
     // Initialize sound.
     let frequency = 44_100;
     let format = AUDIO_S16LSB; // signed 16 bit samples, in little-endian byte order
     let channels = DEFAULT_CHANNELS; // Stereo
     let chunk_size = 1_024;
-    sdl2::mixer::open_audio(frequency, format, channels, chunk_size)?;
+    sdl2::mixer::open_audio(frequency, format, channels, chunk_size).unwrap();
     let _mixer_context =
-        sdl2::mixer::init(InitFlag::MP3 | InitFlag::FLAC | InitFlag::MOD | InitFlag::OGG)?;
+        sdl2::mixer::init(InitFlag::MP3 | InitFlag::FLAC | InitFlag::MOD | InitFlag::OGG).unwrap();
     sdl2::mixer::allocate_channels(6);
     
     // Set initial menu state.
     let mut state: Box<dyn State> = Box::new(StartMenuState {selected_option: 0});
-    let mut events = sdl_context.event_pump()?;
-    let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+    let mut events = sdl_context.event_pump().unwrap();
+    let mut canvas = window.into_canvas().build().map_err(|e| e.to_string()).unwrap();
+    canvas.set_logical_size(800, 600).unwrap();
 
     // Initial context instantiation.
     let mut texture_creator = canvas.texture_creator();
     let mut font_context= sdl2::ttf::init().unwrap();
     let mut context = Context::new(&mut texture_creator, &mut font_context);
-    context.music.play(-1).unwrap();
+    //context.music.play(-1).unwrap();
     context.move_fx.set_volume(50);
 
     // TODO: This should be handled in the game state....
@@ -76,7 +77,7 @@ pub fn main() -> Result<(), String> {
                 | Event::KeyDown {
                     keycode: Some(Keycode::Escape),
                     ..
-                } => break 'running,
+                } => {break 'running},
                 _ => {}
             }
         }
@@ -94,6 +95,7 @@ pub fn main() -> Result<(), String> {
             }
         }
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
-    }
+    };
+
     Ok(())
 }

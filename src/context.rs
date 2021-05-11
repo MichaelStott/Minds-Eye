@@ -10,6 +10,7 @@ use crate::resource_manager::ResourceManager;
 use crate::resource_manager::FontDetails;
 use crate::state::State;
 use crate::tile::Tile;
+//use crate::texture_manager::TextureManager;
 use sdl2::render::WindowCanvas;
 use sdl2::EventPump;
 
@@ -76,6 +77,10 @@ impl<'a> Context<'a> {
         }
     }
 
+    // pub fn load_texture(&mut self, path: &str) -> &Texture {
+    //     self.texture_manager.load(&path)
+    // }
+
     fn get_texture_name(tile: char) -> String {
         if tile == '8' {
             return String::from("res/img/dbg_floor_shadow_top.png");
@@ -100,6 +105,7 @@ impl<'a> Context<'a> {
         self.tiles.clear();
         self.eyes.clear();
         self.player = Player::new();
+        self.flames.clear();
         let mut skip = true;
         for line in f.lines() {
             if skip {

@@ -83,7 +83,7 @@ impl State for GameState {
             .unwrap();
         // Draw the scene.
         for tile in &mut context.tiles {
-            if !tile.isblock && !tile.iswall {
+            if !tile.isblock && !tile.iswall && context.camera.is_object_visible(tile.x, tile.y, tile.width, tile.height) {
                 tile.draw(
                     &context.texture_manager.load(&tile.texture).unwrap(),
                     &mut context.camera,
@@ -95,7 +95,7 @@ impl State for GameState {
             .player
             .draw_shadow(&tex_shadow, &mut context.camera, canvas);
         for tile in &mut context.tiles {
-            if tile.isblock || tile.iswall {
+            if (tile.isblock || tile.iswall) && context.camera.is_object_visible(tile.x, tile.y, tile.width, tile.height)  {
                 tile.draw(
                     &context.texture_manager.load(&tile.texture).unwrap(),
                     &mut context.camera,
@@ -104,30 +104,32 @@ impl State for GameState {
             }
         }
         for eye in context.eyes.iter_mut() {
-            let tex_pupil = if eye.color == "blue" {
-                context
-                    .texture_manager
-                    .load("res/img/bluepupil.png")
-                    .unwrap()
-            } else {
-                if eye.color == "red" {
+            if context.camera.is_object_visible(eye.x, eye.y, eye.width, eye.height)  {
+                let tex_pupil = if eye.color == "blue" {
                     context
                         .texture_manager
-                        .load("res/img/redpupil.png")
+                        .load("res/img/bluepupil.png")
                         .unwrap()
                 } else {
-                    context
-                        .texture_manager
-                        .load("res/img/greenpupil.png")
-                        .unwrap()
-                }
-            };
-            eye.draw(
-                &mut context.socket_tex,
-                &tex_pupil,
-                &mut context.camera,
-                canvas,
-            );
+                    if eye.color == "red" {
+                        context
+                            .texture_manager
+                            .load("res/img/redpupil.png")
+                            .unwrap()
+                    } else {
+                        context
+                            .texture_manager
+                            .load("res/img/greenpupil.png")
+                            .unwrap()
+                    }
+                };
+                eye.draw(
+                    &mut context.socket_tex,
+                    &tex_pupil,
+                    &mut context.camera,
+                    canvas,
+                );
+            }
         }
         context.player.draw(&tex_player, &mut context.camera, canvas);
         let tex_fire = context.texture_manager.load("res/img/fire2.png").unwrap();
