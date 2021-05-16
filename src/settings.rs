@@ -1,1 +1,1 @@
-pub static DEBUG: bool = false;
+pub static DEBUG: bool = true;

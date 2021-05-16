@@ -1,7 +1,7 @@
 use crate::level_select_state::LevelSelectState;
 use crate::context::Context;
 use crate::physics::handle_collisions;
-use crate::state::State;
+use crate::barn::game::state::State;
 
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;

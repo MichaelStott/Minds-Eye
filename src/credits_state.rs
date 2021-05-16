@@ -1,6 +1,6 @@
 use crate::start_menu_state::StartMenuState;
 use crate::context::Context;
-use crate::state::State;
+use crate::barn::game::state::State;
 
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;

@@ -1,5 +1,5 @@
 use crate::camera::Camera;
-use crate::input_handler::InputHandler;
+use crate::barn::input::keyboard_handler::KeyboardHandler;
 use crate::settings;
 
 use std::collections::HashMap;
@@ -83,7 +83,7 @@ impl Player {
         result
     }
 
-    pub fn update(&mut self, input: &mut InputHandler) {
+    pub fn update(&mut self, input: &mut KeyboardHandler) {
         // Update movement
         let prev_anim = self.active_animation.clone();
         if input.key_pressed(&Keycode::Left) && !input.key_pressed(&Keycode::Right) {

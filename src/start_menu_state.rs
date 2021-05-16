@@ -7,7 +7,7 @@ use crate::context::TILE_WIDTH;
 use crate::eye::Eye;
 use crate::game_state::GameState;
 use crate::context::Context;
-use crate::state::State;
+use crate::barn::game::state::State;
 
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;

@@ -3,15 +3,17 @@ use sdl2::EventPump;
 
 use std::collections::HashSet;
 
-pub struct InputHandler {
+/// Keeps track of keyboard events
+pub struct KeyboardHandler {
     new_keys: HashSet<Keycode>,
     prev_keys: HashSet<Keycode>,
     current_keys: HashSet<Keycode>,
 }
 
-impl InputHandler {
-    pub fn new() -> InputHandler {
-        InputHandler {
+impl KeyboardHandler {
+
+    pub fn new() -> KeyboardHandler {
+        KeyboardHandler {
             new_keys: HashSet::new(),
             prev_keys: HashSet::new(),
             current_keys: HashSet::new(),

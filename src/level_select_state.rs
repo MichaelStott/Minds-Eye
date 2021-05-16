@@ -10,7 +10,7 @@ use std::fs;
 use sdl2::pixels::Color;
 use sdl2::keyboard::Keycode;
 use crate::context::Context;
-use crate::state::State;
+use crate::barn::game::state::State;
 
 pub struct LevelSelectState {
     pub levels: HashMap<String, String>,

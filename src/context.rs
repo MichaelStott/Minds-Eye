@@ -4,13 +4,12 @@ use sdl2::ttf::Sdl2TtfContext;
 use sdl2::ttf::Font;
 use crate::camera::Camera;
 use crate::eye::Eye;
-use crate::input_handler::InputHandler;
+use crate::barn::input::keyboard_handler::KeyboardHandler;
 use crate::player::Player;
 use crate::resource_manager::ResourceManager;
 use crate::resource_manager::FontDetails;
-use crate::state::State;
+use crate::barn::game::state::State;
 use crate::tile::Tile;
-//use crate::texture_manager::TextureManager;
 use sdl2::render::WindowCanvas;
 use sdl2::EventPump;
 
@@ -42,7 +41,7 @@ pub struct Context<'a> {
     pub player: Player,
     pub camera: Camera,
     pub flags: HashMap<String, bool>,
-    pub input: InputHandler,
+    pub input: KeyboardHandler,
     pub music: Music<'a>,
     pub socket_tex: Texture<'a>,
     pub back_fx: Chunk,
@@ -64,7 +63,7 @@ impl<'a> Context<'a> {
             player: Player::new(),
             camera: Camera::new(),
             flags: HashMap::new(),
-            input: InputHandler::new(),
+            input: KeyboardHandler::new(),
             texture_manager: TextureManager::new(&texture_creator),
             socket_tex: texture_creator.load_texture(Path::new("res/img/socket.png")).unwrap(),
             back_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/back.ogg")).unwrap(),

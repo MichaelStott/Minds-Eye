@@ -1,11 +1,11 @@
 extern crate sdl2;
+mod barn;
 
 mod texture_manager;
 mod camera;
 mod context;
 mod eye;
 mod game_state;
-mod input_handler;
 mod physics;
 mod player;
 mod resource_manager;
@@ -14,12 +14,11 @@ mod start_menu_state;
 mod level_select_state;
 mod help_state;
 mod credits_state;
-mod state;
 mod tile;
 mod fire;
 
 use crate::start_menu_state::StartMenuState;
-use crate::state::State;
+use crate::barn::game::state::State;
 use context::Context;
 
 use sdl2::event::Event;
