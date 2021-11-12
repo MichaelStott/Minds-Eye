@@ -1,3 +1,4 @@
+
 use sdl2::image::LoadTexture;
 use sdl2::render::{Texture, TextureCreator};
 use sdl2::ttf::{Font, Sdl2TtfContext};
@@ -48,7 +49,7 @@ where
 }
 
 // TextureCreator knows how to load Textures
-impl<'l, T> ResourceLoader<'l, Texture<'l>> for TextureCreator<T> {
+impl<'l, T> ResourceLoader<'l, Texture> for TextureCreator<T> {
     type Args = str;
     fn load(&'l self, path: &str) -> Result<Texture, String> {
         //println!("LOADED A TEXTURE");

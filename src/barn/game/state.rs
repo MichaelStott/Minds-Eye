@@ -1,9 +1,10 @@
-use crate::context::Context;
+
+use sdl2::render::TextureCreator;
+use crate::barn::game::context::Context;
 
 use sdl2::render::WindowCanvas;
 
 pub trait State {
-
     // Update game logic.
     fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>>;
 

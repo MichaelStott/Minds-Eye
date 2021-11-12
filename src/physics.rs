@@ -1,6 +1,6 @@
-use sdl2::mixer::Chunk;
 use crate::player::Player;
 use crate::tile::Tile;
+use sdl2::mixer::Chunk;
 
 pub fn handle_collisions(player: &mut Player, tiles: &mut Vec<Tile>, move_fx: &Chunk) {
     handle_collision_x(player, tiles, move_fx);
@@ -61,7 +61,7 @@ fn handle_collision_y(player: &mut Player, tiles: &mut Vec<Tile>, move_fx: &Chun
                         }
                     }
                     player.y = if dir == 1 {
-                        tile.y - 25  + tile.height as i32
+                        tile.y - 25 + tile.height as i32
                     } else {
                         tile.y - player.height as i32
                     };

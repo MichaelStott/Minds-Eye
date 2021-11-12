@@ -10,7 +10,7 @@ use sdl2::render::WindowCanvas;
 use rand::Rng;
 
 pub struct Eye {
-    pub direction: String, // Unused variable.
+    pub direction: String,
     pub color: String,
     pub solved: bool,
     pub x: i32,
@@ -153,7 +153,7 @@ impl Eye {
         } else if self.color == "blue" {
             tex_socket.set_color_mod(self.anger, self.anger, 255);
         }
-        
+
         canvas
             .copy(
                 &tex_socket,

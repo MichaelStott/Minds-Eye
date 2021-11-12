@@ -7,8 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 rand = "0.7.2"
+log = "0.4.14"
+env_logger = "0.9.0"
 
 [dependencies.sdl2]
 default-features = false
-features = ["image", "ttf", "mixer"]
+features = ["image", "ttf", "mixer", "unsafe_textures"]
 

@@ -1,5 +1,5 @@
-use crate::camera::Camera;
 use crate::barn::input::keyboard_handler::KeyboardHandler;
+use crate::camera::Camera;
 use crate::settings;
 
 use std::collections::HashMap;
@@ -144,28 +144,27 @@ impl Player {
         self.y += dy;
     }
 
-    pub fn draw_shadow(&mut self,
-        texture: &Texture,
-        camera: &mut Camera,
-        canvas: &mut WindowCanvas) {
-        canvas.copy(
-            texture,
-            Rect::new(0, 0, self.width, self.width),
-            Rect::new(
-                self.x - camera.x,
-                self.y - camera.y + 24,
-                self.width,
-                self.height,
-            ),
-        ).unwrap();
-    }
-
-    pub fn draw(
+    pub fn draw_shadow(
         &mut self,
         texture: &Texture,
         camera: &mut Camera,
         canvas: &mut WindowCanvas,
     ) {
+        canvas
+            .copy(
+                texture,
+                Rect::new(0, 0, self.width, self.width),
+                Rect::new(
+                    self.x - camera.x,
+                    self.y - camera.y + 24,
+                    self.width,
+                    self.height,
+                ),
+            )
+            .unwrap();
+    }
+
+    pub fn draw(&mut self, texture: &Texture, camera: &mut Camera, canvas: &mut WindowCanvas) {
         canvas
             .copy_ex(
                 &texture,

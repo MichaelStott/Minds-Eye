@@ -11,7 +11,6 @@ pub struct KeyboardHandler {
 }
 
 impl KeyboardHandler {
-
     pub fn new() -> KeyboardHandler {
         KeyboardHandler {
             new_keys: HashSet::new(),

@@ -1,6 +1,6 @@
-use sdl2::mixer::Chunk;
 use crate::camera::Camera;
 use crate::settings;
+use sdl2::mixer::Chunk;
 
 use std::ptr;
 
@@ -39,7 +39,10 @@ impl Tile {
         }
         let mut intersected = false;
         for tile in tiles {
-            if (tile.iswall || tile.isblock) && !(prevx == tile.x && prevy == tile.y) && does_intersect(tile, self) {
+            if (tile.iswall || tile.isblock)
+                && !(prevx == tile.x && prevy == tile.y)
+                && does_intersect(tile, self)
+            {
                 self.x = prevx;
                 self.resistancex = 30;
                 self.targetx = self.x;
@@ -61,7 +64,10 @@ impl Tile {
         }
         intersected = false;
         for tile in tiles {
-            if (tile.iswall || tile.isblock) && !(prevx == tile.x && prevy == tile.y) && does_intersect(tile, self) {
+            if (tile.iswall || tile.isblock)
+                && !(prevx == tile.x && prevy == tile.y)
+                && does_intersect(tile, self)
+            {
                 self.y = prevy;
                 self.resistancey = 30;
                 self.targety = self.y;
@@ -102,7 +108,8 @@ impl Tile {
     }
 
     pub fn has_moved(&mut self) -> bool {
-        (self.targety - self.y).abs() == self.height as i32  || (self.targetx - self.x).abs() == self.width as i32
+        (self.targety - self.y).abs() == self.height as i32
+            || (self.targetx - self.x).abs() == self.width as i32
     }
 }
 
@@ -112,4 +119,3 @@ pub fn does_intersect(player: &Tile, tile: &Tile) -> bool {
         && (player.y < tile.y + tile.height as i32)
         && (player.y + player.height as i32 > tile.y)
 }
-
