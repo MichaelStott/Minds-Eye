@@ -1,15 +1,15 @@
-use crate::barn::game::context::Context;
-use crate::barn::game::state::State;
-use crate::camera::Camera;
-use crate::eye::Eye;
-use crate::fire::Fire;
-use crate::level_select_state::LevelSelectState;
-use crate::physics::handle_collisions;
-use crate::player::Player;
-use crate::tile::Tile;
-use sdl2::mixer::Chunk;
-use sdl2::render::Texture;
-use sdl2::render::TextureCreator;
+use barn::math::vector2::Vector2;
+use barn::math::bounding_box_2d::BoundingBox2D;
+use barn::game::context::Context;
+use barn::game::state::State;
+use crate::game::camera::Camera;
+use crate::game::eye::Eye;
+use crate::game::fire::Fire;
+use crate::game::level_select_state::LevelSelectState;
+use crate::game::physics::handle_collisions;
+use crate::game::player::Player;
+use crate::game::tile::Tile;
+use crate::settings;
 
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -17,11 +17,7 @@ use sdl2::rect::Rect;
 use sdl2::render::BlendMode;
 use sdl2::render::WindowCanvas;
 
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
-use std::rc::Rc;
 use std::time::Instant;
 
 pub const TILE_WIDTH: u32 = 64;
@@ -40,9 +36,7 @@ pub struct GameState/*<'a>*/ {
     pub blocks: Vec<Tile>,
     pub eyes: Vec<Eye>,
     pub player: Player,
-    pub move_fx: Chunk,
     pub camera: Camera,
-    // pub socket_tex: Texture<'a>,
 }
 
 impl State for GameState {
@@ -50,17 +44,7 @@ impl State for GameState {
         if context.input.key_just_pressed(&Keycode::R) {
             self.load_level(String::from(&self.level_path), context);
         } else if context.input.key_just_pressed(&Keycode::Q) {
-            return Some(Box::new(LevelSelectState {
-                levels: HashMap::new(),
-                options: Vec::new(),
-                selected_option: 0,
-                camera: Camera::new(),
-                back_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/back.ogg")).unwrap(),
-                select_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/select.ogg")).unwrap(),
-                enter_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/enter.ogg")).unwrap(),
-                tiles: Vec::new(),
-                eyes: Vec::new(),
-            }));
+            return Some(Box::new(LevelSelectState::new(0)));
         }
 
         for fire in self.flames.iter_mut() {
@@ -73,7 +57,8 @@ impl State for GameState {
             if tile.has_moved() {
                 self.moves += 1;
             }
-            tile.update(new_tiles, &self.move_fx);
+            let move_fx = context.load_sound(String::from("res/sound/push.ogg"));
+            tile.update(new_tiles, move_fx);
         }
 
         // Check if the puzzle has been solved.
@@ -87,10 +72,11 @@ impl State for GameState {
         if !self.won {
             // Update the player.
             self.player.update(&mut context.input);
-            handle_collisions(&mut self.player, &mut self.tiles, &self.move_fx);
+            let move_fx = context.load_sound(String::from("res/sound/push.ogg"));
+            handle_collisions(&mut self.player, &mut self.tiles, move_fx);
             self.camera.focus(
-                self.player.x + self.player.width as i32 / 2,
-                self.player.y + self.player.height as i32 / 2,
+                self.player.pos.x as i32 + self.player.width as i32 / 2,
+                self.player.pos.y as i32 + self.player.height as i32 / 2,
             );
         } else {
             if self.time_str == "" {
@@ -98,17 +84,7 @@ impl State for GameState {
                 self.time_str = elapsed_time.to_string();
             }
             if context.input.key_just_pressed(&Keycode::Return) {
-                return Some(Box::new(LevelSelectState {
-                    levels: HashMap::new(),
-                    options: Vec::new(),
-                    selected_option: 0,
-                    camera: Camera::new(),
-                    back_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/back.ogg")).unwrap(),
-                    select_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/select.ogg")).unwrap(),
-                    enter_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/enter.ogg")).unwrap(),
-                    tiles: Vec::new(),
-                    eyes: Vec::new(),
-                }));
+                return Some(Box::new(LevelSelectState::new(0)));
             }
         }
 
@@ -117,83 +93,74 @@ impl State for GameState {
     }
 
     fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
-        self.camera.width = (canvas.output_size().unwrap().0) as i32;
-        self.camera.height = (canvas.output_size().unwrap().1) as i32;
-        
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
 
+        self.camera.width = (canvas.output_size().unwrap().0) as i32;
+        self.camera.height = (canvas.output_size().unwrap().1) as i32;
+        
         // Get all of the image assets.
-        let tex_player = context.texture_manager.load("res/img/player.png").unwrap();
-        let tex_shadow = context
-            .texture_manager
-            .load("res/img/drop_shadow.png")
-            .unwrap();
-        // Draw the scene.
         for tile in &mut self.tiles {
             if !tile.isblock
                 && !tile.iswall
                 && self
                     .camera
-                    .is_object_visible(tile.x, tile.y, tile.width, tile.height)
+                    .is_object_visible(tile.bb.origin.x as i32, 
+                        tile.bb.origin.y as i32, 
+                        tile.bb.width as u32,
+                        tile.bb.height as u32)
             {
                 tile.draw(
-                    &context.texture_manager.load(&tile.texture).unwrap(),
+                    &context.load_texture(tile.texture.clone()),
                     &mut self.camera,
                     canvas,
                 );
             }
         }
+        let tex_shadow = context.load_texture(String::from("res/img/drop_shadow.png"));
         self.player
             .draw_shadow(&tex_shadow, &mut self.camera, canvas);
         for tile in &mut self.tiles {
             if (tile.isblock || tile.iswall)
                 && self
                     .camera
-                    .is_object_visible(tile.x, tile.y, tile.width, tile.height)
+                    .is_object_visible(tile.bb.origin.x as i32, 
+                        tile.bb.origin.y as i32, 
+                        tile.bb.width as u32,
+                        tile.bb.height as u32)
             {
                 tile.draw(
-                    &context.texture_manager.load(&tile.texture).unwrap(),
+                    &context.load_texture(tile.texture.clone()),
                     &mut self.camera,
                     canvas,
                 );
             }
         }
+        // Render menu eyes.
         for eye in self.eyes.iter_mut() {
-            if self
-                .camera
-                .is_object_visible(eye.x, eye.y, eye.width, eye.height)
-            {
-                let tex_pupil = if eye.color == "blue" {
-                    context
-                        .texture_manager
-                        .load("res/img/bluepupil.png")
-                        .unwrap()
+            let socket_tex =  context.load_texture(String::from("res/img/socket.png"));
+            eye.draw_socket(socket_tex, &mut self.camera, canvas);
+            let tex_pupil = if eye.color == "blue" {
+                context.load_texture(String::from("res/img/bluepupil.png"))
+            } else {
+                if eye.color == "red" {
+                    context.load_texture(String::from("res/img/redpupil.png"))
                 } else {
-                    if eye.color == "red" {
-                        context
-                            .texture_manager
-                            .load("res/img/redpupil.png")
-                            .unwrap()
-                    } else {
-                        context
-                            .texture_manager
-                            .load("res/img/greenpupil.png")
-                            .unwrap()
-                    }
-                };
-                // eye.draw(&mut self.socket_tex, &tex_pupil, &mut self.camera, canvas);
-            }
+                    context.load_texture(String::from("res/img/greenpupil.png"))
+                }
+            };
+            eye.draw_iris(tex_pupil, &mut self.camera, canvas);
         }
+        let tex_player = context.load_texture(String::from("res/img/player.png"));
         self.player.draw(&tex_player, &mut self.camera, canvas);
-        let tex_fire = context.texture_manager.load("res/img/fire2.png").unwrap();
-        let tex_glow = context
-            .texture_manager
-            .load("res/img/fire_glow.png")
-            .unwrap();
-        for fire in self.flames.iter_mut() {
-            fire.draw(&tex_fire, &tex_glow, &mut self.camera, canvas)
-        }
+        // let tex_fire = context.load_texture(String::from("res/img/fire2.png"));
+        // let tex_glow = context
+        //     .texture_manager
+        //     .load("res/img/fire_glow.png")
+        //     .unwrap();
+        // for fire in self.flames.iter_mut() {
+        //     fire.draw(&tex_fire, &tex_glow, &mut self.camera, canvas)
+        // }
         if self.won {
             canvas.set_draw_color(Color::RGBA(0, 0, 0, 150));
             canvas.set_blend_mode(BlendMode::Blend);
@@ -205,7 +172,7 @@ impl State for GameState {
                     self.camera.height as u32,
                 ))
                 .unwrap();
-            let font = context.font_manager.load(&context.font_details).unwrap();
+            let font = context.load_font(*settings::FONT_DETAILS);
             let texture_creator = canvas.texture_creator();
 
             // Render the title.
@@ -288,6 +255,8 @@ impl State for GameState {
     }
 
     fn on_enter(&mut self, context: &mut Context) {
+        // self.camera.width = context.screen_width as i32;
+        // self.camera.height = context.screen_height as i32;
         self.load_level(String::from(&self.level_path), context);
         self.time = Instant::now();
     }
@@ -301,9 +270,25 @@ impl State for GameState {
     }
 }
 
-impl/*<'a>*/ GameState/*<'_>*/ {
+impl GameState {
+    pub fn new(path: String) -> Self {
+        GameState {
+            level_path: path,
+            won: false,
+            time: Instant::now(),
+            time_str: String::from(""),
+            moves: 0,
+            flames: Vec::new(),
+            tiles: Vec::new(),
+            blocks: Vec::new(),
+            eyes: Vec::new(),
+            player: Player::new(),
+            camera: Camera::new()
+        }
+    }
+
     pub fn load_level(&mut self, level: String, context: &mut Context) {
-        context.font_manager.load(&context.font_details).unwrap();
+        context.load_font(*settings::FONT_DETAILS);
         let f = fs::read_to_string(level).expect("Could not load level!");
         let mut cury: i32 = 10;
         let mut temp_blocks: Vec<Tile> = Vec::new();
@@ -323,14 +308,9 @@ impl/*<'a>*/ GameState/*<'_>*/ {
                 if TILE_CHARS.contains(&c) {
                     self.tiles.push(Tile {
                         texture: GameState::get_texture_name(c),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        target_pos: Vector2 {x: curx as f32, y: cury as f32},
+                        resistance: 30,
                         iswall: false,
                         isblock: false,
                     });
@@ -342,14 +322,9 @@ impl/*<'a>*/ GameState/*<'_>*/ {
                     self.flames.push(flame);
                     self.tiles.push(Tile {
                         texture: String::from("res/img/torch.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        target_pos: Vector2 {x: curx as f32, y: cury as f32},
+                        resistance: 30,
                         iswall: true,
                         isblock: false,
                     });
@@ -357,14 +332,9 @@ impl/*<'a>*/ GameState/*<'_>*/ {
                 } else if c == 'x' {
                     self.tiles.push(Tile {
                         texture: String::from("res/img/grayblock.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 0,
-                        resistancey: 0,
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        target_pos: Vector2 {x: curx as f32, y: cury as f32},
+                        resistance: 30,
                         iswall: true,
                         isblock: false,
                     });
@@ -372,42 +342,27 @@ impl/*<'a>*/ GameState/*<'_>*/ {
                 } else if c == 'b' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/blueblock.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 30,
-                        resistancey: 30,
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        target_pos: Vector2 {x: curx as f32, y: cury as f32},
+                        resistance: 30,
                         iswall: false,
                         isblock: true,
                     });
                 } else if c == 'g' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/greenblock.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 30,
-                        resistancey: 30,
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        target_pos: Vector2 {x: curx as f32, y: cury as f32},
+                        resistance: 30,
                         iswall: false,
                         isblock: true,
                     });
                 } else if c == 'r' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/redblock.png"),
-                        width: TILE_WIDTH,
-                        height: TILE_HEIGHT,
-                        x: curx,
-                        y: cury,
-                        targetx: curx,
-                        targety: cury,
-                        resistancex: 30,
-                        resistancey: 30,
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        target_pos: Vector2 {x: curx as f32, y: cury as f32},
+                        resistance: 30,
                         iswall: false,
                         isblock: true,
                     });
@@ -451,9 +406,9 @@ impl/*<'a>*/ GameState/*<'_>*/ {
                         anger: 0,
                     });
                 } else if c == 'p' {
-                    self.player.x = curx + (TILE_WIDTH / 2) as i32 - (self.player.width / 2) as i32;
-                    self.player.y =
-                        cury + 3 - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32;
+                    self.player.pos.x = (curx + (TILE_WIDTH / 2) as i32 - (self.player.width / 2) as i32) as f32;
+                    self.player.pos.y =
+                        (cury + 3 - (TILE_HEIGHT / 2) as i32 + (self.player.height / 2) as i32) as f32;
                 } else if c == ' ' {
                     curx += TILE_WIDTH as i32;
                 }
@@ -467,10 +422,10 @@ impl/*<'a>*/ GameState/*<'_>*/ {
             self.eyes.push(eye);
         }
 
-        self.camera.minx = self.player.x + self.player.width as i32 / 2;
-        self.camera.maxx = self.player.x + self.player.width as i32 / 2;
-        self.camera.miny = self.player.y - self.player.height as i32 / 2;
-        self.camera.maxy = self.player.y - self.player.height as i32 / 2;
+        self.camera.minx = self.player.pos.x as i32 + self.player.width as i32 / 2;
+        self.camera.maxx = self.player.pos.x as i32+ self.player.width as i32 / 2;
+        self.camera.miny = self.player.pos.y as i32 - self.player.height as i32 / 2;
+        self.camera.maxy = self.player.pos.y as i32 - self.player.height as i32 / 2;
     }
 
     fn get_texture_name(tile: char) -> String {

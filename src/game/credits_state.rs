@@ -1,39 +1,28 @@
-use crate::barn::game::context::Context;
-use crate::barn::game::state::State;
-use crate::camera::Camera;
-use crate::start_menu_state::StartMenuState;
-use sdl2::mixer::Chunk;
-use std::path::Path;
+use barn::game::context::Context;
+use barn::game::state::State;
+use crate::game::camera::Camera;
+use crate::game::start_menu_state::StartMenuState;
+use crate::settings;
 
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
-pub struct HelpState {
+pub struct CreditsState {
     pub camera: Camera,
-    pub back_fx: Chunk,
 }
 
-impl State for HelpState {
+impl State for CreditsState {
     fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>> {
         if context.input.key_just_pressed(&Keycode::Return) {
-            let channel = sdl2::mixer::channel(2);
-            channel.play(&self.back_fx, 0);
-            return Some(Box::new(StartMenuState { 
-                selected_option: 1,
-                tiles: Vec::new(),
-                blocks: Vec::new(),
-                eyes: Vec::new(),
-                move_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/push.ogg")).unwrap(),
-                select_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/select.ogg")).unwrap(),
-                camera: Camera::new(),
-                //socket_tex: texture_creator.load_texture(Path::new("res/img/socket.png")).unwrap(),
-                enter_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/enter.ogg")).unwrap(),
-            }));
+            let back_fx = context.load_sound(String::from("res/sound/back.ogg"));
+            let channel = sdl2::mixer::Channel(2);
+            channel.play(back_fx, 0).unwrap();
+            return Some(Box::new(StartMenuState::new(2)));
         }
         None
-    }
+    } 
 
     fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
         self.camera.width = (canvas.output_size().unwrap().0) as i32;
@@ -41,11 +30,11 @@ impl State for HelpState {
         
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
-        let font = context.font_manager.load(&context.font_details).unwrap();
+        let font = context.load_font(*settings::FONT_DETAILS);
         let texture_creator = canvas.texture_creator();
 
         let title = font
-            .render("Help")
+            .render("Credits")
             .blended(Color::RGBA(255, 255, 255, 255))
             .unwrap();
         let title_tex = texture_creator.create_texture_from_surface(&title).unwrap();
@@ -63,7 +52,7 @@ impl State for HelpState {
             .unwrap();
 
         let play = font
-            .render("Movement: Arrow Keys")
+            .render("Developed by Michael Stott")
             .blended(Color::RGBA(255, 255, 255, 255))
             .unwrap();
         let play_tex = texture_creator.create_texture_from_surface(&play).unwrap();
@@ -81,7 +70,7 @@ impl State for HelpState {
             .unwrap();
 
         let help = font
-            .render("Reset Puzzle: \"R\" key")
+            .render("Music by Kevin MacLeod")
             .blended(Color::RGBA(255, 255, 255, 255))
             .unwrap();
         let help_tex = texture_creator.create_texture_from_surface(&help).unwrap();
@@ -94,26 +83,6 @@ impl State for HelpState {
                     300,
                     help.size().0 * 3,
                     help.size().1 * 3,
-                ),
-            )
-            .unwrap();
-
-        let credits = font
-            .render("Exit Puzzle: \"Q\" key")
-            .blended(Color::RGBA(255, 255, 255, 255))
-            .unwrap();
-        let credits_tex = texture_creator
-            .create_texture_from_surface(&credits)
-            .unwrap();
-        canvas
-            .copy(
-                &credits_tex,
-                None,
-                Rect::new(
-                    self.camera.width / 2 - credits.size().0 as i32 * 3 / 2,
-                    400,
-                    credits.size().0 * 3,
-                    credits.size().1 * 3,
                 ),
             )
             .unwrap();
@@ -142,12 +111,11 @@ impl State for HelpState {
 
     fn on_enter(&mut self, context: &mut Context) {
         self.camera = Camera::new();
-        self.back_fx = sdl2::mixer::Chunk::from_file(Path::new("res/sound/back.ogg")).unwrap();
     }
 
     fn on_exit(&mut self, context: &mut Context) {}
 
     fn get_name(&mut self) -> String {
-        String::from("help")
+        String::from("credits")
     }
 }

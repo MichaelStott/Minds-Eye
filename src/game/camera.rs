@@ -24,11 +24,10 @@ impl Camera {
     }
 
     pub fn is_object_visible(&mut self, x: i32, y: i32, width: u32, height: u32) -> bool {
-        // (0 < x - self.x + width as i32)
-        //     && (self.width as i32 > x - self.x)
-        //     && (0 < y - self.y + height as i32)
-        //     && (self.height as i32 > y - self.y)
-        true
+        (0 < x - self.x + width as i32)
+            && (self.width as i32 > x - self.x)
+            && (0 < y - self.y + height as i32)
+            && (self.height as i32 > y - self.y)
     }
 
     pub fn focus(&mut self, foc_x: i32, foc_y: i32) {

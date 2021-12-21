@@ -1,17 +1,16 @@
-use crate::barn::game::context::Context;
-use crate::barn::game::state::State;
-use crate::camera::Camera;
-use crate::credits_state::CreditsState;
-use crate::eye::Eye;
-use crate::game_state::GameState;
-use crate::game_state::TILE_HEIGHT;
-use crate::game_state::TILE_WIDTH;
-use crate::help_state::HelpState;
-use crate::level_select_state::LevelSelectState;
-use crate::tile::Tile;
-use sdl2::mixer::Chunk;
-use sdl2::render::Texture;
-use std::path::Path;
+use barn::math::vector2::Vector2;
+use barn::math::bounding_box_2d::BoundingBox2D;
+use barn::game::context::Context;
+use barn::game::state::State;
+use crate::game::camera::Camera;
+use crate::game::credits_state::CreditsState;
+use crate::game::eye::Eye;
+use crate::game::game_state::TILE_HEIGHT;
+use crate::game::game_state::TILE_WIDTH;
+use crate::game::help_state::HelpState;
+use crate::game::level_select_state::LevelSelectState;
+use crate::game::tile::Tile;
+use crate::settings;
 
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
@@ -20,19 +19,25 @@ use sdl2::render::WindowCanvas;
 
 use std::collections::HashMap;
 
-pub struct StartMenuState /*<'a> */ {
+pub struct StartMenuState {
     pub selected_option: u32,
     pub tiles: Vec<Tile>,
-    pub blocks: Vec<Tile>,
     pub eyes: Vec<Eye>,
-    pub move_fx: Chunk,
-    pub select_fx: Chunk,
     pub camera: Camera,
-    // pub socket_tex: Texture<'a>,
-    pub enter_fx: Chunk,
 }
 
-impl State for StartMenuState /*<'a>*/ {
+impl StartMenuState {
+    pub fn new(selected_option: u32) -> Self {
+        StartMenuState {
+            selected_option: selected_option, 
+            tiles: Vec::new(),
+            eyes: Vec::new(),
+            camera: Camera::new()
+        }
+    }
+}
+
+impl State for StartMenuState {
     fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>> {
         for eye in self.eyes.iter_mut() {
             eye.update(&mut self.tiles);
@@ -51,84 +56,63 @@ impl State for StartMenuState /*<'a>*/ {
                 self.selected_option -= 1;
             }
         }
+       
+        
         if prev_option != self.selected_option {
-            let channel = sdl2::mixer::channel(1);
-            channel.play(&self.select_fx, 0);
+            let channel = sdl2::mixer::Channel(1);
+            let select_fx = context.load_sound(String::from("res/sound/select.ogg"));
+            channel.play(select_fx, 0).unwrap();
             self.tiles.clear();
             if self.selected_option == 0 {
                 self.tiles.push(Tile {
                     texture: String::from("res/img/blueblock.png"),
-                    width: TILE_WIDTH,
-                    height: TILE_HEIGHT,
-                    x: 200,
-                    y: 200,
-                    targetx: 200,
-                    targety: 200,
-                    resistancex: 30,
-                    resistancey: 30,
+                    bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 200.0}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                    target_pos: Vector2 {x: 200.0, y: 200.0},
+                    resistance: 30,
                     iswall: false,
                     isblock: true,
                 });
             } else if self.selected_option == 1 {
                 self.tiles.push(Tile {
                     texture: String::from("res/img/greenblock.png"),
-                    width: TILE_WIDTH,
-                    height: TILE_HEIGHT,
-                    x: 200,
-                    y: 300,
-                    targetx: 200,
-                    targety: 500,
-                    resistancex: 30,
-                    resistancey: 30,
+                    bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 300.0}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                    target_pos: Vector2 {x: 200.0, y: 500.0},
+                    resistance: 30,
                     iswall: false,
                     isblock: true,
                 });
             } else if self.selected_option == 2 {
                 self.tiles.push(Tile {
                     texture: String::from("res/img/redblock.png"),
-                    width: TILE_WIDTH,
-                    height: TILE_HEIGHT,
-                    x: self.camera.width / 2 - 32,
-                    y: 200,
-                    targetx: 200,
-                    targety: 200,
-                    resistancex: 30,
-                    resistancey: 30,
+                    bb: BoundingBox2D {origin: Vector2 {x: (self.camera.width / 2 - 32) as f32, y: 300.0}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                    target_pos: Vector2 {x: 200.0, y: 200.0},
+                    resistance: 30,
                     iswall: false,
                     isblock: true,
                 });
             }
         }
-
+       
         if context.input.key_just_pressed(&Keycode::Return) {
-            let channel = sdl2::mixer::channel(2);
-            channel.play(&self.enter_fx, 0);
+            let enter_fx = context.load_sound(String::from("res/sound/enter.ogg"));
+            let channel = sdl2::mixer::Channel(2);
+            channel.play(enter_fx, 0).unwrap();
             if self.selected_option == 0 {
                 return Some(Box::new(LevelSelectState {
                     levels: HashMap::new(),
                     options: Vec::new(),
                     selected_option: 0,
                     camera: Camera::new(),
-                    back_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/back.ogg"))
-                        .unwrap(),
-                    select_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/select.ogg"))
-                        .unwrap(),
-                    enter_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/enter.ogg"))
-                        .unwrap(),
                     tiles: Vec::new(),
                     eyes: Vec::new(),
                 }));
             } else if self.selected_option == 1 {
                 return Some(Box::new(HelpState {
                     camera: Camera::new(),
-                    back_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/back.ogg"))
-                        .unwrap(),
                 }));
             } else if self.selected_option == 2 {
                 return Some(Box::new(CreditsState {
                     camera: Camera::new(),
-                    back_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/back.ogg"))
-                        .unwrap(),
                 }));
             }
         }
@@ -143,10 +127,10 @@ impl State for StartMenuState /*<'a>*/ {
     fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
         self.camera.width = (canvas.output_size().unwrap().0) as i32;
         self.camera.height = (canvas.output_size().unwrap().1) as i32;
-
+        
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
-        let font = context.font_manager.load(&context.font_details).unwrap();
+        let font = context.load_font(*settings::FONT_DETAILS);
         let texture_creator = canvas.texture_creator();
 
         // Render the title.
@@ -257,31 +241,29 @@ impl State for StartMenuState /*<'a>*/ {
 
         // Render menu eyes.
         for eye in self.eyes.iter_mut() {
+            let socket_tex =  context.load_texture(String::from("res/img/socket.png"));
+            eye.draw_socket(socket_tex, &mut self.camera, canvas);
             let tex_pupil = if eye.color == "blue" {
-                context
-                    .texture_manager
-                    .load("res/img/bluepupil.png")
-                    .unwrap()
+                context.load_texture(String::from("res/img/bluepupil.png"))
             } else {
                 if eye.color == "red" {
-                    context
-                        .texture_manager
-                        .load("res/img/redpupil.png")
-                        .unwrap()
+                    context.load_texture(String::from("res/img/redpupil.png"))
                 } else {
-                    context
-                        .texture_manager
-                        .load("res/img/greenpupil.png")
-                        .unwrap()
+                    context.load_texture(String::from("res/img/greenpupil.png"))
                 }
             };
-            let socket_tex = &mut context.texture_manager.load("res/img/socket.png").unwrap();
-            // eye.draw(socket_tex, &tex_pupil, &mut self.camera, canvas);
+            eye.draw_iris(tex_pupil, &mut self.camera, canvas);
         }
         canvas.present();
     }
 
     fn on_enter(&mut self, context: &mut Context) {
+        self.camera.width = context.screen_width as i32;
+        self.camera.height = context.screen_height as i32;
+        context.load_texture(String::from("res/img/socket.png"));
+        context.load_texture(String::from("res/img/bluepupil.png"));
+        context.load_texture(String::from("res/img/redpupil.png"));
+        context.load_texture(String::from("res/img/greenpupil.png"));
         self.eyes.push(Eye {
             direction: String::from("left"),
             x: 150,
@@ -321,46 +303,32 @@ impl State for StartMenuState /*<'a>*/ {
         if self.selected_option == 0 {
             self.tiles.push(Tile {
                 texture: String::from("res/img/blueblock.png"),
-                width: TILE_WIDTH,
-                height: TILE_HEIGHT,
-                x: 200,
-                y: 200,
-                targetx: 200,
-                targety: 200,
-                resistancex: 30,
-                resistancey: 30,
+                bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 200.0}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                target_pos: Vector2 {x: 200.0, y: 200.0},
+                resistance: 30,
                 iswall: false,
                 isblock: true,
             });
         } else if self.selected_option == 1 {
             self.tiles.push(Tile {
                 texture: String::from("res/img/greenblock.png"),
-                width: TILE_WIDTH,
-                height: TILE_HEIGHT,
-                x: 200,
-                y: 300,
-                targetx: 200,
-                targety: 500,
-                resistancex: 30,
-                resistancey: 30,
+                bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 300.0}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                target_pos: Vector2 {x: 200.0, y: 500.0},
+                resistance: 30,
                 iswall: false,
                 isblock: true,
             });
         } else if self.selected_option == 2 {
             self.tiles.push(Tile {
                 texture: String::from("res/img/redblock.png"),
-                width: TILE_WIDTH,
-                height: TILE_HEIGHT,
-                x: self.camera.width / 2 - 32,
-                y: 200,
-                targetx: 200,
-                targety: 200,
-                resistancex: 30,
-                resistancey: 30,
+                bb: BoundingBox2D {origin: Vector2 {x: (self.camera.width / 2 - 32) as f32, y: 300.0}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                target_pos: Vector2 {x: 200.0, y: 200.0},
+                resistance: 30,
                 iswall: false,
                 isblock: true,
             });
         }
+        
         self.camera.x = 0;
         self.camera.y = 0;
     }

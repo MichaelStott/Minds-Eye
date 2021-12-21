@@ -1,4 +1,4 @@
-use crate::camera::Camera;
+use crate::game::camera::Camera;
 use std::collections::HashMap;
 
 use rand::distributions::{Distribution, Uniform};

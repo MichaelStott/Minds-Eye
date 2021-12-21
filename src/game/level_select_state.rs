@@ -1,32 +1,29 @@
-use sdl2::render::TextureCreator;
-use crate::player::Player;
-use crate::barn::game::context::Context;
-use crate::barn::game::state::State;
-use crate::camera::Camera;
-use crate::eye::Eye;
-use crate::game_state::GameState;
-use crate::start_menu_state::StartMenuState;
-use crate::tile::Tile;
+use barn::fonts::font_details::FontDetails;
+use crate::game::player::Player;
+use barn::game::context::Context;
+use barn::game::state::State;
+use crate::game::camera::Camera;
+use crate::game::eye::Eye;
+use crate::game::game_state::GameState;
+use crate::game::start_menu_state::StartMenuState;
+use crate::game::tile::Tile;
+use crate::settings;
+
 use sdl2::keyboard::Keycode;
-use sdl2::mixer::Chunk;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
 use std::time::Instant;
 
 pub struct LevelSelectState {
     pub levels: HashMap<String, String>,
     pub options: Vec<String>,
     pub selected_option: i32,
-    pub enter_fx: Chunk,
-    pub select_fx: Chunk,
-    pub back_fx: Chunk,
     pub camera: Camera,
     pub tiles: Vec<Tile>,
-    pub eyes: Vec<Eye>,
+    pub eyes: Vec<Eye>
 }
 
 impl State for LevelSelectState {
@@ -49,57 +46,26 @@ impl State for LevelSelectState {
         } else if context.input.key_just_pressed(&Keycode::Right) && self.selected_option == -1 {
             self.selected_option = 0;
         } else if context.input.key_just_pressed(&Keycode::B) {
-            return Some(Box::new(StartMenuState { 
-                selected_option: 0,
-                tiles: Vec::new(),
-                blocks: Vec::new(),
-                eyes: Vec::new(),
-                move_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/push.ogg")).unwrap(),
-                select_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/select.ogg")).unwrap(),
-                camera: Camera::new(),
-                //socket_tex: texture_creator.load_texture(Path::new("res/img/socket.png")).unwrap(),
-                enter_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/enter.ogg")).unwrap(),
-            }));
+            return Some(Box::new(StartMenuState::new(0)));
         }
         if prev_option != self.selected_option {
-            let channel = sdl2::mixer::channel(1);
-            channel.play(&self.select_fx, 0);
+            let select_fx = context.load_sound(String::from("res/sound/select.ogg"));
+            let channel = sdl2::mixer::Channel(1);
+            channel.play(select_fx, 0);
         }
         if context.input.key_just_pressed(&Keycode::Return) {
             if self.selected_option == -1 {
-                let channel = sdl2::mixer::channel(2);
-                channel.play(&self.back_fx, 0);
-                return Some(Box::new(StartMenuState { 
-                    selected_option: 0,
-                    tiles: Vec::new(),
-                    blocks: Vec::new(),
-                    eyes: Vec::new(),
-                    move_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/push.ogg")).unwrap(),
-                    select_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/select.ogg")).unwrap(),
-                    camera: Camera::new(),
-                    //socket_tex: context.texture_manager. load("res/img/socket.png").unwrap(),
-                    enter_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/enter.ogg")).unwrap(),
-                }));
+                let back_fx = context.load_sound(String::from("res/sound/back.ogg"));
+                let channel = sdl2::mixer::Channel(2);
+                channel.play(back_fx, 0);
+                return Some(Box::new(StartMenuState::new(0)));
             } else {
-                let channel = sdl2::mixer::channel(2);
-                channel.play(&self.enter_fx, 0);
+                let enter_fx = context.load_sound(String::from("res/sound/enter.ogg"));
+                let channel = sdl2::mixer::Channel(2);
+                channel.play(enter_fx, 0);
                 let key = self.options[self.selected_option as usize].clone();
                 let path = self.levels.get(&key).unwrap();
-                return Some(Box::new(GameState {
-                    level_path: path.to_string(),
-                    won: false,
-                    time: Instant::now(),
-                    time_str: String::from(""),
-                    moves: 0,
-                    flames: Vec::new(),
-                    tiles: Vec::new(),
-                    blocks: Vec::new(),
-                    eyes: Vec::new(),
-                    player: Player::new(),
-                    move_fx: sdl2::mixer::Chunk::from_file(Path::new("res/sound/push.ogg")).unwrap(),
-                    camera: Camera::new(),
-                    //socket_tex: context.texture_manager.load("res/img/socket.png").unwrap(),
-                }));
+                return Some(Box::new(GameState::new(path.to_string())));
             }
         }
         None
@@ -108,10 +74,10 @@ impl State for LevelSelectState {
     fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
         self.camera.width = (canvas.output_size().unwrap().0) as i32;
         self.camera.height = (canvas.output_size().unwrap().1) as i32;
-        
+
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
-        let font = context.font_manager.load(&context.font_details).unwrap();
+        let font = context.load_font(*settings::FONT_DETAILS);
         let texture_creator = canvas.texture_creator();
 
         // Render the title.
@@ -250,5 +216,18 @@ impl State for LevelSelectState {
 
     fn get_name(&mut self) -> String {
         String::from("level_select")
+    }
+}
+
+impl LevelSelectState {
+    pub fn new(option: i32) -> Self {
+        LevelSelectState {
+            levels: HashMap::new(),
+            options: Vec::new(),
+            selected_option: option,
+            camera: Camera::new(),
+            tiles: Vec::new(),
+            eyes: Vec::new()
+        }
     }
 }
