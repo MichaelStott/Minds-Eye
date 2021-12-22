@@ -1,4 +1,3 @@
-extern crate barn;
 use barn::game::game::Game;
 use barn::game::context::Context;
 use barn::game::state::State;
@@ -7,7 +6,6 @@ mod game;
 mod settings;
 use crate::settings as config;
 use crate::game::start_menu_state::StartMenuState;
-
 
 pub fn main() -> Result<(), String> {
     // Create game window.
