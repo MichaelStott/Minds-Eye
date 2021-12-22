@@ -1,7 +1,7 @@
 extern crate rand;
 
-use crate::camera::Camera;
-use crate::tile::Tile;
+use crate::game::camera::Camera;
+use crate::game::tile::Tile;
 
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
@@ -10,7 +10,7 @@ use sdl2::render::WindowCanvas;
 use rand::Rng;
 
 pub struct Eye {
-    pub direction: String, // Unused variable.
+    pub direction: String,
     pub color: String,
     pub solved: bool,
     pub x: i32,
@@ -26,24 +26,24 @@ impl Eye {
     pub fn update(&mut self, tiles: &mut Vec<Tile>) {
         let mut rng = rand::thread_rng();
         self.solved = false;
-        let mut distance = -1;
+        let mut distance = -1.0;
         let mut isblock = false;
         // Check for the closest block.
         for tile in tiles.iter_mut() {
-            if tile.y == self.y && self.x > tile.x && (tile.isblock || tile.iswall) {
-                if distance == -1 || self.x - tile.x < distance {
-                    distance = self.x - tile.x;
+            if tile.bb.origin.y == self.y as f32 && self.x as f32 > tile.bb.origin.x && (tile.isblock || tile.iswall) {
+                if distance == -1.0 || self.x as f32 - tile.bb.origin.x < distance {
+                    distance = self.x as f32 - tile.bb.origin.x;
                     isblock = tile.isblock && tile.texture.contains(&self.color);
                     self.direction = String::from("left");
                 }
             }
         }
         if !isblock {
-            distance = -1;
+            distance = -1.0;
             for tile in tiles.iter_mut() {
-                if tile.y == self.y && self.x < tile.x && (tile.isblock || tile.iswall) {
-                    if distance == -1 || tile.x - self.x < distance {
-                        distance = tile.x - self.x;
+                if tile.bb.origin.y == self.y as f32 && (self.x as f32) < tile.bb.origin.x && (tile.isblock || tile.iswall) {
+                    if distance == -1.0 || tile.bb.origin.x - (self.x as f32) < distance {
+                        distance = tile.bb.origin.x - self.x as f32;
                         isblock = tile.isblock && tile.texture.contains(&self.color);
                         self.direction = String::from("right");
                     }
@@ -51,11 +51,11 @@ impl Eye {
             }
         }
         if !isblock {
-            distance = -1;
+            distance = -1.0;
             for tile in tiles.iter_mut() {
-                if tile.x == self.x && self.y < tile.y && (tile.isblock || tile.iswall) {
-                    if distance == -1 || tile.y - self.y < distance {
-                        distance = tile.y - self.y;
+                if tile.bb.origin.x == self.x as f32 && (self.y as f32) < tile.bb.origin.y && (tile.isblock || tile.iswall) {
+                    if distance == -1.0 || tile.bb.origin.y - (self.y as f32) < distance {
+                        distance = tile.bb.origin.y - self.y as f32;
                         isblock = tile.isblock && tile.texture.contains(&self.color);
                         self.direction = String::from("up");
                     }
@@ -63,11 +63,11 @@ impl Eye {
             }
         }
         if !isblock {
-            distance = -1;
+            distance = -1.0;
             for tile in tiles.iter_mut() {
-                if tile.x == self.x && self.y > tile.y && (tile.isblock || tile.iswall) {
-                    if distance == -1 || self.y - tile.y < distance {
-                        distance = self.y - tile.y;
+                if tile.bb.origin.x == self.x as f32 && self.y as f32 > tile.bb.origin.y && (tile.isblock || tile.iswall) {
+                    if distance == -1.0 || self.y as f32 - tile.bb.origin.y < distance {
+                        distance = self.y as f32- tile.bb.origin.y;
                         isblock = tile.isblock && tile.texture.contains(&self.color);
                         self.direction = String::from("down");
                     }
@@ -139,10 +139,9 @@ impl Eye {
         }
     }
 
-    pub fn draw(
+    pub fn draw_socket(
         &mut self,
         tex_socket: &mut Texture,
-        tex_pupil: &Texture,
         camera: &mut Camera,
         canvas: &mut WindowCanvas,
     ) {
@@ -153,7 +152,7 @@ impl Eye {
         } else if self.color == "blue" {
             tex_socket.set_color_mod(self.anger, self.anger, 255);
         }
-        
+
         canvas
             .copy(
                 &tex_socket,
@@ -166,6 +165,14 @@ impl Eye {
                 )),
             )
             .unwrap();
+    }
+
+    pub fn draw_iris(
+        &mut self,
+        tex_pupil: &Texture,
+        camera: &mut Camera,
+        canvas: &mut WindowCanvas,
+    ) {
         canvas
             .copy(
                 &tex_pupil,

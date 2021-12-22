@@ -1,13 +1,22 @@
 [package]
-name = "game"
+name = "minds_eye"
 version = "0.1.0"
 authors = ["Michael <stottmichael2@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
+barn = { git = "https://github.com/MichaelStott/barn.git" }
 rand = "0.7.2"
+gl = "0.14.0"
+log = "0.4.14"
+env_logger = "0.9.0"
+freetype-rs = "0.29.0"
+lazy_static = "1.2.0"
+leak = "0.1.2"
 
 [dependencies.sdl2]
 default-features = false
-features = ["image", "ttf", "mixer"]
+features = ["image", "ttf", "mixer", "unsafe_textures"]
+
+

@@ -1,4 +1,4 @@
-use crate::camera::Camera;
+use crate::game::camera::Camera;
 use std::collections::HashMap;
 
 use rand::distributions::{Distribution, Uniform};
@@ -23,7 +23,7 @@ impl Fire {
     pub fn new() -> Fire {
         Fire {
             width: 24,
-            height: 42, 
+            height: 42,
             x: 26 + 128,
             y: 26 + 64 * 6,
             delay: 10,
@@ -37,15 +37,14 @@ impl Fire {
         let mut result: HashMap<String, Vec<Rect>> = HashMap::new();
         let mut flame: Vec<Rect> = Vec::new();
         let mut glow: Vec<Rect> = Vec::new();
-        flame.push(Rect::new(0,0,8,14));
-        flame.push(Rect::new(8,0,8,14));
+        flame.push(Rect::new(0, 0, 8, 14));
+        flame.push(Rect::new(8, 0, 8, 14));
         result.insert(String::from("flame"), flame);
-        glow.push(Rect::new(0,0,32,32));
-        glow.push(Rect::new(32,0,32,32));
+        glow.push(Rect::new(0, 0, 32, 32));
+        glow.push(Rect::new(32, 0, 32, 32));
         result.insert(String::from("glow"), glow);
         result
     }
-
 
     pub fn update(&mut self) {
         // Update animation
@@ -58,7 +57,6 @@ impl Fire {
             self.delay = 5
         }
     }
-
 
     pub fn draw(
         &mut self,
@@ -88,7 +86,7 @@ impl Fire {
                 &glow_texture,
                 self.animations.get("glow").unwrap()[self.frame as usize],
                 Some(Rect::new(
-                    self.x  - camera.x - 32 + self.width as i32 / 2,
+                    self.x - camera.x - 32 + self.width as i32 / 2,
                     self.y - camera.y - 4,
                     64,
                     64,

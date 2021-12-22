@@ -1,5 +1,6 @@
-use crate::camera::Camera;
-use crate::input_handler::InputHandler;
+use barn::math::vector2::Vector2;
+use barn::input::keyboard_handler::KeyboardHandler;
+use crate::game::camera::Camera;
 use crate::settings;
 
 use std::collections::HashMap;
@@ -13,10 +14,8 @@ use sdl2::render::WindowCanvas;
 pub struct Player {
     pub width: u32,
     pub height: u32,
-    pub x: i32,
-    pub y: i32,
-    pub velx: i32,
-    pub vely: i32,
+    pub pos: Vector2,
+    pub vel: Vector2,
     pub xrect: i32,
     pub delay: i32,
     pub frame: i32,
@@ -29,10 +28,8 @@ impl Player {
         Player {
             width: 36,
             height: 60,
-            x: 26 + 128,
-            y: 26 + 64 * 6,
-            velx: 0,
-            vely: 0,
+            pos: Vector2::zero(),
+            vel: Vector2::zero(),
             xrect: 0,
             delay: 15,
             frame: 0,
@@ -83,27 +80,27 @@ impl Player {
         result
     }
 
-    pub fn update(&mut self, input: &mut InputHandler) {
+    pub fn update(&mut self, input: &mut KeyboardHandler) {
         // Update movement
         let prev_anim = self.active_animation.clone();
         if input.key_pressed(&Keycode::Left) && !input.key_pressed(&Keycode::Right) {
-            self.velx -= 3;
+            self.vel.x -= 3.0;
             if self.active_animation != "walk_left" {
                 self.active_animation = String::from("walk_left");
             }
         } else if input.key_pressed(&Keycode::Right) && !input.key_pressed(&Keycode::Left) {
-            self.velx += 3;
+            self.vel.x += 3.0;
             if self.active_animation != "walk_right" {
                 self.active_animation = String::from("walk_right");
             }
         }
         if input.key_pressed(&Keycode::Up) && !input.key_pressed(&Keycode::Down) {
-            self.vely -= 3;
+            self.vel.y -= 3.0;
             if self.active_animation != "walk_up" {
                 self.active_animation = String::from("walk_up");
             }
         } else if input.key_pressed(&Keycode::Down) && !input.key_pressed(&Keycode::Up) {
-            self.vely += 3;
+            self.vel.y += 3.0;
             if self.active_animation != "walk_down" {
                 self.active_animation = String::from("walk_down");
             }
@@ -139,40 +136,34 @@ impl Player {
         }
     }
 
-    pub fn move_player(&mut self, dx: i32, dy: i32) {
-        self.x += dx;
-        self.y += dy;
-    }
-
-    pub fn draw_shadow(&mut self,
-        texture: &Texture,
-        camera: &mut Camera,
-        canvas: &mut WindowCanvas) {
-        canvas.copy(
-            texture,
-            Rect::new(0, 0, self.width, self.width),
-            Rect::new(
-                self.x - camera.x,
-                self.y - camera.y + 24,
-                self.width,
-                self.height,
-            ),
-        ).unwrap();
-    }
-
-    pub fn draw(
+    pub fn draw_shadow(
         &mut self,
         texture: &Texture,
         camera: &mut Camera,
         canvas: &mut WindowCanvas,
     ) {
         canvas
+            .copy(
+                texture,
+                Rect::new(0, 0, self.width, self.width),
+                Rect::new(
+                    self.pos.x as i32 - camera.x,
+                    self.pos.y as i32 - camera.y + 24,
+                    self.width,
+                    self.height,
+                ),
+            )
+            .unwrap();
+    }
+
+    pub fn draw(&mut self, texture: &Texture, camera: &mut Camera, canvas: &mut WindowCanvas) {
+        canvas
             .copy_ex(
                 &texture,
                 self.animations.get(&self.active_animation).unwrap()[self.frame as usize],
                 Rect::new(
-                    self.x - camera.x,
-                    self.y - camera.y,
+                    self.pos.x as i32 - camera.x,
+                    self.pos.y as i32- camera.y,
                     self.width,
                     self.height,
                 ),
@@ -191,8 +182,8 @@ impl Player {
             canvas.set_draw_color(Color::RGB(0, 220, 0));
             canvas
                 .draw_rect(Rect::new(
-                    self.x - camera.x,
-                    self.y - camera.y,
+                    self.pos.x as i32 - camera.x,
+                    self.pos.y as i32 - camera.y,
                     self.width,
                     self.height,
                 ))
