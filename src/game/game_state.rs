@@ -1,6 +1,9 @@
+use barn::graphics::barn_gfx::BarnGFX;
+use barn::game::barn_context::BarnContext;
+use barn::graphics::color::Color;
+use barn::graphics::fill_type::FillType;
 use barn::math::vector2::Vector2;
 use barn::math::bounding_box_2d::BoundingBox2D;
-use barn::game::context::Context;
 use barn::game::state::State;
 use crate::game::camera::Camera;
 use crate::game::eye::Eye;
@@ -12,10 +15,8 @@ use crate::game::tile::Tile;
 use crate::settings;
 
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::BlendMode;
-use sdl2::render::WindowCanvas;
 
 use std::fs;
 use std::time::Instant;
@@ -39,8 +40,8 @@ pub struct GameState/*<'a>*/ {
     pub camera: Camera,
 }
 
-impl State for GameState {
-    fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>> {
+impl State<BarnContext> for GameState {
+    fn update(&mut self, context: &mut BarnContext, dt: f32) -> Option<Box<dyn State<BarnContext>>> {
         if context.input.key_just_pressed(&Keycode::R) {
             self.load_level(String::from(&self.level_path), context);
         } else if context.input.key_just_pressed(&Keycode::Q) {
@@ -64,14 +65,14 @@ impl State for GameState {
         // Check if the puzzle has been solved.
         self.won = true;
         for eye in self.eyes.iter_mut() {
-            eye.update(&mut self.tiles);
+            eye.update(&mut self.tiles, dt);
             if !eye.solved {
                 self.won = false;
             }
         }
         if !self.won {
             // Update the player.
-            self.player.update(&mut context.input);
+            self.player.update(&mut context.input, dt);
             let move_fx = context.load_sound(String::from("res/sound/push.ogg"));
             handle_collisions(&mut self.player, &mut self.tiles, move_fx);
             self.camera.focus(
@@ -92,12 +93,10 @@ impl State for GameState {
         None
     }
 
-    fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
-        canvas.clear();
-
-        self.camera.width = (canvas.output_size().unwrap().0) as i32;
-        self.camera.height = (canvas.output_size().unwrap().1) as i32;
+    fn draw(&mut self, context: &mut BarnContext, bgfx: &mut BarnGFX) {
+        // Clear screen to black.
+        bgfx.sdl.set_draw_color(Color::BLACK);
+        bgfx.sdl.clear();
         
         // Get all of the image assets.
         for tile in &mut self.tiles {
@@ -111,15 +110,15 @@ impl State for GameState {
                         tile.bb.height as u32)
             {
                 tile.draw(
-                    &context.load_texture(tile.texture.clone()),
+                    &mut context.load_texture(tile.texture.clone()),
                     &mut self.camera,
-                    canvas,
+                    bgfx,
                 );
             }
         }
         let tex_shadow = context.load_texture(String::from("res/img/drop_shadow.png"));
         self.player
-            .draw_shadow(&tex_shadow, &mut self.camera, canvas);
+            .draw_shadow(tex_shadow, &mut self.camera, bgfx);
         for tile in &mut self.tiles {
             if (tile.isblock || tile.iswall)
                 && self
@@ -130,16 +129,16 @@ impl State for GameState {
                         tile.bb.height as u32)
             {
                 tile.draw(
-                    &context.load_texture(tile.texture.clone()),
+                    &mut context.load_texture(tile.texture.clone()),
                     &mut self.camera,
-                    canvas,
+                    bgfx,
                 );
             }
         }
         // Render menu eyes.
         for eye in self.eyes.iter_mut() {
             let socket_tex =  context.load_texture(String::from("res/img/socket.png"));
-            eye.draw_socket(socket_tex, &mut self.camera, canvas);
+            eye.draw_socket(socket_tex, &mut self.camera, bgfx);
             let tex_pupil = if eye.color == "blue" {
                 context.load_texture(String::from("res/img/bluepupil.png"))
             } else {
@@ -149,10 +148,10 @@ impl State for GameState {
                     context.load_texture(String::from("res/img/greenpupil.png"))
                 }
             };
-            eye.draw_iris(tex_pupil, &mut self.camera, canvas);
+            eye.draw_iris(tex_pupil, &mut self.camera, bgfx);
         }
         let tex_player = context.load_texture(String::from("res/img/player.png"));
-        self.player.draw(&tex_player, &mut self.camera, canvas);
+        self.player.draw(tex_player, &mut self.camera, bgfx);
         // let tex_fire = context.load_texture(String::from("res/img/fire2.png"));
         // let tex_glow = context
         //     .texture_manager
@@ -162,106 +161,45 @@ impl State for GameState {
         //     fire.draw(&tex_fire, &tex_glow, &mut self.camera, canvas)
         // }
         if self.won {
-            canvas.set_draw_color(Color::RGBA(0, 0, 0, 150));
-            canvas.set_blend_mode(BlendMode::Blend);
-            canvas
-                .fill_rect(Rect::new(
-                    0,
-                    0,
-                    self.camera.width as u32,
-                    self.camera.height as u32,
-                ))
-                .unwrap();
+            bgfx.sdl.set_draw_color(Color::from_rgba(0, 0, 0, 150));
+
+            // TODO: THIS MUST BE ADDED TO BARN
+            //canvas.set_blend_mode(BlendMode::Blend);
+            bgfx.sdl.draw_rect(0, 0, self.camera.width as u32, self.camera.height as u32, FillType::FILL, false);
+
             let font = context.load_font(*settings::FONT_DETAILS);
-            let texture_creator = canvas.texture_creator();
 
             // Render the title.
-            let title = font
-                .render("Solved!")
-                .blended(Color::RGBA(255, 255, 255, 255))
-                .unwrap();
-            let title_tex = texture_creator.create_texture_from_surface(&title).unwrap();
-            canvas
-                .copy(
-                    &title_tex,
-                    None,
-                    Rect::new(
-                        self.camera.width / 2 - 4 * title.size().0 as i32 / 2,
-                        30,
-                        title.size().0 * 4,
-                        title.size().1 * 4,
-                    ),
-                )
-                .unwrap();
+            bgfx.sdl.draw_text("Solved!", font, 
+            self.camera.width as f32 / 2.0 - 4.0, 30.0, 4.0, 4.0, true, false);
 
             // Render time result.
-            let time = font
-                .render(&format!("Time: {} seconds", self.time_str))
-                .blended(Color::RGBA(255, 255, 255, 255))
-                .unwrap();
-            let time_tex = texture_creator.create_texture_from_surface(&time).unwrap();
-            canvas
-                .copy(
-                    &time_tex,
-                    None,
-                    Rect::new(
-                        self.camera.width / 2 - 3 * time.size().0 as i32 / 2,
-                        self.camera.height / 2 - 3 * time.size().1 as i32 / 2,
-                        time.size().0 * 3,
-                        time.size().1 * 3,
-                    ),
-                )
-                .unwrap();
+            bgfx.sdl.draw_text(&format!("Time: {} seconds", self.time_str), font, 
+                self.camera.width as f32 / 2.0, self.camera.height as f32 / 2.0, 3.0, 3.0, true, true);
 
             // Render number of moves.
-            let moves = font
-                .render(&format!("Moves taken: {}", self.moves))
-                .blended(Color::RGBA(255, 255, 255, 255))
-                .unwrap();
-            let moves_tex = texture_creator.create_texture_from_surface(&moves).unwrap();
-            canvas
-                .copy(
-                    &moves_tex,
-                    None,
-                    Rect::new(
-                        self.camera.width / 2 - 3 * moves.size().0 as i32 / 2,
-                        self.camera.height / 2 + 4 * moves.size().1 as i32 / 2,
-                        moves.size().0 * 3,
-                        moves.size().1 * 3,
-                    ),
-                )
-                .unwrap();
+            bgfx.sdl.draw_text(&format!("Moves taken: {}", self.moves), font, 
+                self.camera.width as f32 / 2.0, self.camera.height as f32 / 2.0, 3.0, 3.0, true, true);
 
             // Render number of moves.
-            let back = font
-                .render("Press enter to go back")
-                .blended(Color::RGBA(255, 255, 255, 255))
-                .unwrap();
-            let back_tex = texture_creator.create_texture_from_surface(&back).unwrap();
-            canvas
-                .copy(
-                    &back_tex,
-                    None,
-                    Rect::new(
-                        0,
-                        self.camera.height - back.size().1 as i32 * 2,
-                        back.size().0 * 2,
-                        back.size().1 * 2,
-                    ),
-                )
-                .unwrap();
+            bgfx.sdl.draw_text("Press enter to go back", font, 
+                0.0, self.camera.height as f32 / 2.0, 2.0, 2.0, false, false);
+            
         }
-        canvas.present();
+        bgfx.sdl.present();
     }
 
-    fn on_enter(&mut self, context: &mut Context) {
+    fn on_enter(&mut self, context: &mut BarnContext) {
         // self.camera.width = context.screen_width as i32;
         // self.camera.height = context.screen_height as i32;
+        self.camera = Camera::new();
+        self.camera.width = 800;
+        self.camera.height = 600;
         self.load_level(String::from(&self.level_path), context);
         self.time = Instant::now();
     }
 
-    fn on_exit(&mut self, context: &mut Context) {
+    fn on_exit(&mut self, context: &mut BarnContext) {
         self.flames.clear();
     }
 
@@ -287,7 +225,7 @@ impl GameState {
         }
     }
 
-    pub fn load_level(&mut self, level: String, context: &mut Context) {
+    pub fn load_level(&mut self, level: String, context: &mut BarnContext) {
         context.load_font(*settings::FONT_DETAILS);
         let f = fs::read_to_string(level).expect("Could not load level!");
         let mut cury: i32 = 10;
@@ -308,7 +246,7 @@ impl GameState {
                 if TILE_CHARS.contains(&c) {
                     self.tiles.push(Tile {
                         texture: GameState::get_texture_name(c),
-                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
                         resistance: 30,
                         iswall: false,
@@ -322,7 +260,7 @@ impl GameState {
                     self.flames.push(flame);
                     self.tiles.push(Tile {
                         texture: String::from("res/img/torch.png"),
-                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
                         resistance: 30,
                         iswall: true,
@@ -332,7 +270,7 @@ impl GameState {
                 } else if c == 'x' {
                     self.tiles.push(Tile {
                         texture: String::from("res/img/grayblock.png"),
-                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
                         resistance: 30,
                         iswall: true,
@@ -342,7 +280,7 @@ impl GameState {
                 } else if c == 'b' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/blueblock.png"),
-                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
                         resistance: 30,
                         iswall: false,
@@ -351,7 +289,7 @@ impl GameState {
                 } else if c == 'g' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/greenblock.png"),
-                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
                         resistance: 30,
                         iswall: false,
@@ -360,7 +298,7 @@ impl GameState {
                 } else if c == 'r' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/redblock.png"),
-                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH as i32, height: TILE_HEIGHT as i32},
+                        bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
                         resistance: 30,
                         iswall: false,
@@ -375,8 +313,8 @@ impl GameState {
                         height: TILE_HEIGHT,
                         color: String::from("blue"),
                         solved: false,
-                        deltax: 0,
-                        deltay: 0,
+                        deltax: 0.0,
+                        deltay: 0.0,
                         anger: 0,
                     });
                 } else if c == 'R' {
@@ -388,8 +326,8 @@ impl GameState {
                         height: TILE_HEIGHT,
                         color: String::from("red"),
                         solved: false,
-                        deltax: 0,
-                        deltay: 0,
+                        deltax: 0.0,
+                        deltay: 0.0,
                         anger: 0,
                     });
                 } else if c == 'G' {
@@ -401,8 +339,8 @@ impl GameState {
                         height: TILE_HEIGHT,
                         color: String::from("green"),
                         solved: false,
-                        deltax: 0,
-                        deltay: 0,
+                        deltax: 0.0,
+                        deltay: 0.0,
                         anger: 0,
                     });
                 } else if c == 'p' {

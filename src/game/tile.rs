@@ -1,3 +1,7 @@
+use barn::graphics::color::Color;
+use barn::graphics::SdlTexture;
+use barn::graphics::barn_gfx::BarnGFX;
+use barn::graphics::fill_type::FillType;
 use barn::math::vector2::Vector2;
 use barn::math::bounding_box_2d::BoundingBox2D;
 use crate::game::camera::Camera;
@@ -6,7 +10,6 @@ use sdl2::mixer::Chunk;
 
 use std::ptr;
 
-use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use sdl2::render::WindowCanvas;
@@ -36,43 +39,36 @@ impl Tile {
         // Check if tile needs to be moved.
         let mut intersected = false;
         for tile in tiles {
-            if (tile.iswall || tile.isblock)
-                && prev_pos != self.bb.origin
-                && self.bb.intersects_box(tile.bb.clone()) {
-                self.bb.origin = prev_pos.clone();
-                self.resistance = 30;
-                self.target_pos = self.bb.origin.clone();
-                intersected = true;
-                let channel = sdl2::mixer::Channel(0);
-                channel.play(&move_fx, 0);
-            }
+            // if (tile.iswall || tile.isblock)
+            //     && prev_pos != self.bb.origin
+            //     && self.bb.intersects_box(tile.bb.clone()) {
+            //     self.bb.origin = prev_pos.clone();
+            //     self.resistance = 30;
+            //     self.target_pos = self.bb.origin.clone();
+            //     intersected = true;
+            //     let channel = sdl2::mixer::Channel(0);
+            //     channel.play(&move_fx, 0);
+            // }
         }
     }
 
-    pub fn draw(&mut self, texture: &Texture, camera: &mut Camera, canvas: &mut WindowCanvas) {
-        canvas
-            .copy(
-                &texture,
-                None,
-                Some(Rect::new(
-                    self.bb.origin.x.round() as i32 - camera.x,
-                    self.bb.origin.y.round() as i32 - camera.y,
-                    self.bb.width as u32,
-                    self.bb.height as u32,
-                )),
-            )
-            .unwrap();
+    pub fn draw(&mut self, texture: &mut SdlTexture, camera: &mut Camera, bgfx: &mut BarnGFX) {
+        bgfx.sdl.draw_texture(texture,  None, Some(Rect::new(
+            self.bb.origin.x.round() as i32 - camera.x,
+            self.bb.origin.y.round() as i32 - camera.y,
+            self.bb.width as u32,
+            self.bb.height as u32,
+        )));
+        
         // Render the collision box.
         if settings::DEBUG {
-            canvas.set_draw_color(Color::RGB(220, 220, 220));
-            canvas
-                .draw_rect(Rect::new(
-                    self.bb.origin.x.round() as i32 - camera.x,
-                    self.bb.origin.y.round() as i32 - camera.y,
-                    self.bb.width as u32,
-                    self.bb.height as u32,
-                ))
-                .unwrap();
+            bgfx.sdl.set_draw_color(Color::from_rgb(220, 220, 220));
+            bgfx.sdl.draw_rect(self.bb.origin.x.round() as i32 - camera.x,
+                self.bb.origin.y.round() as i32 - camera.y,  
+                self.bb.width as u32,
+                self.bb.height as u32, 
+                FillType::LINE, 
+                false);
         }
     }
 

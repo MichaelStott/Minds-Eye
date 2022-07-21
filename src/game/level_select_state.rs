@@ -1,4 +1,8 @@
+use barn::graphics::barn_gfx::BarnGFX;
 use barn::fonts::font_details::FontDetails;
+use barn::game::barn_context::BarnContext;
+use barn::graphics::color::Color;
+use barn::graphics::fill_type::FillType;
 use crate::game::player::Player;
 use barn::game::context::Context;
 use barn::game::state::State;
@@ -10,7 +14,6 @@ use crate::game::tile::Tile;
 use crate::settings;
 
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use std::collections::HashMap;
@@ -26,8 +29,8 @@ pub struct LevelSelectState {
     pub eyes: Vec<Eye>
 }
 
-impl State for LevelSelectState {
-    fn update(&mut self, context: &mut Context) -> Option<Box<dyn State>> {
+impl State<BarnContext> for LevelSelectState {
+    fn update(&mut self, context: &mut BarnContext, dt: f32) -> Option<Box<dyn State<BarnContext>>> {
         let prev_option = self.selected_option;
         if context.input.key_just_pressed(&Keycode::Down) {
             if self.selected_option == 4 {
@@ -71,121 +74,115 @@ impl State for LevelSelectState {
         None
     }
 
-    fn draw(&mut self, context: &mut Context, canvas: &mut WindowCanvas) {
-        self.camera.width = (canvas.output_size().unwrap().0) as i32;
-        self.camera.height = (canvas.output_size().unwrap().1) as i32;
+    fn draw(&mut self, context: &mut BarnContext, bgfx: &mut BarnGFX) {
+        self.camera.width = 800;
+        self.camera.height = 600;
 
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
-        canvas.clear();
+        // Clear screen to black.
+        bgfx.sdl.set_draw_color(Color::BLACK);
+        bgfx.sdl.clear();
+
+        // Get font from cache.
         let font = context.load_font(*settings::FONT_DETAILS);
-        let texture_creator = canvas.texture_creator();
+        bgfx.sdl.set_draw_color(Color::WHITE);
 
-        // Render the title.
-        let title = font
-            .render("Level Select")
-            .blended(Color::RGBA(255, 255, 255, 255))
-            .unwrap();
-        let title_tex = texture_creator.create_texture_from_surface(&title).unwrap();
-        canvas
-            .copy(
-                &title_tex,
-                None,
-                Rect::new(
-                    self.camera.width / 2 - 4 * title.size().0 as i32 / 2,
-                    30,
-                    title.size().0 * 4,
-                    title.size().1 * 4,
-                ),
-            )
-            .unwrap();
+        // Render screen title.
+        bgfx.sdl.draw_text("Level Select", font, 
+            self.camera.width as f32 / 2.0,
+            30.0,
+            4.0,
+            4.0,
+            true,
+            false);
+
 
         let mut counter: i32 = 0;
         for level in self.options.iter_mut() {
             let color = if self.selected_option == counter {
-                Color::RGB(0, 0, 0)
+                Color::from_rgb(0, 0, 0)
             } else {
-                Color::RGB(255, 255, 255)
+                Color::from_rgb(255, 255, 255)
             };
-            let level = font.render(&level).blended(color).unwrap();
-            let level_tex = texture_creator.create_texture_from_surface(&level).unwrap();
+
+            // let level = font.render(&level).blended(color).unwrap();
+            // let level_tex = texture_creator.create_texture_from_surface(&level).unwrap();
             if self.selected_option == counter {
-                canvas.set_draw_color(Color::RGB(255, 255, 255));
-                canvas
-                    .fill_rect(Rect::new(
-                        self.camera.width / 2 - 250,
-                        200 + 50 * (counter - 1),
-                        500,
-                        level.size().1 * 2,
-                    ))
-                    .unwrap();
-            }
-            canvas
-                .copy(
-                    &level_tex,
-                    None,
-                    Rect::new(
-                        self.camera.width / 2 - level.size().0 as i32 * 2 / 2,
-                        200 + 50 * (counter - 1),
-                        level.size().0 * 2,
-                        level.size().1 * 2,
-                    ),
-                )
-                .unwrap();
-            canvas.set_draw_color(Color::RGB(255, 255, 255));
-            canvas
-                .draw_rect(Rect::new(
+                bgfx.sdl.set_draw_color(Color::WHITE);
+                bgfx.sdl.draw_rect(
                     self.camera.width / 2 - 250,
-                    200 + 50 * (counter - 1),
-                    500,
-                    level.size().1 * 2,
-                ))
-                .unwrap();
+                    200 + 50 * (counter -1), 
+                    500, 
+                    50, 
+                    FillType::FILL, 
+                    false);
+            }
+            bgfx.sdl.set_draw_color(color);
+            bgfx.sdl.draw_text(&level, font, 
+                (self.camera.width / 2) as f32,
+                (200 + 50 * (counter - 1)) as f32 + 25.0,
+                2.0,
+                2.0,
+                true,
+                true);
+            bgfx.sdl.set_draw_color(color);
+            bgfx.sdl.draw_rect(
+                self.camera.width / 2 - 250,
+                200 + 50 * (counter -1), 
+                500, 
+                50, 
+                FillType::LINE, 
+                false);
+
             counter += 1;
         }
 
         let color = if self.selected_option == -1 {
-            Color::RGB(0, 0, 0)
+            Color::from_rgb(0, 0, 0)
         } else {
-            Color::RGB(255, 255, 255)
+            Color::from_rgb(255, 255, 255)
         };
-        let back = font.render("< Back").blended(color).unwrap();
-        let back_tex = texture_creator.create_texture_from_surface(&back).unwrap();
         if self.selected_option == -1 {
-            canvas.set_draw_color(Color::RGB(255, 255, 255));
-            canvas
-                .fill_rect(Rect::new(
-                    0,
-                    self.camera.height - back.size().1 as i32 * 2,
-                    back.size().0 * 2,
-                    back.size().1 * 2,
-                ))
-                .unwrap();
-        }
-        canvas
-            .copy(
-                &back_tex,
-                None,
-                Rect::new(
-                    0,
-                    self.camera.height - back.size().1 as i32 * 2,
-                    back.size().0 * 2,
-                    back.size().1 * 2,
-                ),
-            )
-            .unwrap();
-        canvas.set_draw_color(Color::RGB(255, 255, 255));
-        canvas
-            .draw_rect(Rect::new(
+            bgfx.sdl.draw_rect(
                 0,
-                self.camera.height - back.size().1 as i32 * 2,
-                back.size().0 * 2,
-                back.size().1 * 2,
-            ))
-            .unwrap();
-        canvas.present();
+                self.camera.height - 100, 
+                100, 
+                50, 
+                FillType::LINE, 
+                false);
+        }
+        bgfx.sdl.draw_text("< Back", font, 
+            0.0,
+            (self.camera.height - 100) as f32,
+            2.0,
+            2.0,
+            true,
+            true);
+        // canvas
+        //     .copy(
+        //         &back_tex,
+        //         None,
+        //         Rect::new(
+        //             0,
+        //             self.camera.height - back.size().1 as i32 * 2,
+        //             back.size().0 * 2,
+        //             back.size().1 * 2,
+        //         ),
+        //     )
+        //     .unwrap();
+        // canvas.set_draw_color(Color::RGB(255, 255, 255));
+        // canvas
+        //     .draw_rect(Rect::new(
+        //         0,
+        //         self.camera.height - back.size().1 as i32 * 2,
+        //         back.size().0 * 2,
+        //         back.size().1 * 2,
+        //     ))
+        //     .unwrap();
+        // canvas.present();
+        bgfx.sdl.present();
     }
 
-    fn on_enter(&mut self, context: &mut Context) {
+    fn on_enter(&mut self, context: &mut BarnContext) {
         let paths = fs::read_dir("./res/levels/").unwrap();
         self.camera = Camera::new();
         for path in paths {
@@ -208,7 +205,7 @@ impl State for LevelSelectState {
         self.options.sort();
     }
 
-    fn on_exit(&mut self, context: &mut Context) {
+    fn on_exit(&mut self, context: &mut BarnContext) {
         self.eyes.clear();
         self.tiles.clear();
         self.levels.clear();
