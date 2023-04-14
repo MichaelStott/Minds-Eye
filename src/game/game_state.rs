@@ -15,8 +15,6 @@ use crate::game::tile::Tile;
 use crate::settings;
 
 use sdl2::keyboard::Keycode;
-use sdl2::rect::Rect;
-use sdl2::render::BlendMode;
 
 use std::fs;
 use std::time::Instant;
@@ -59,7 +57,7 @@ impl State<BarnContext> for GameState {
                 self.moves += 1;
             }
             let move_fx = context.load_sound(String::from("res/sound/push.ogg"));
-            tile.update(new_tiles, move_fx);
+            tile.update(new_tiles, move_fx, dt);
         }
 
         // Check if the puzzle has been solved.
@@ -74,7 +72,7 @@ impl State<BarnContext> for GameState {
             // Update the player.
             self.player.update(&mut context.input, dt);
             let move_fx = context.load_sound(String::from("res/sound/push.ogg"));
-            handle_collisions(&mut self.player, &mut self.tiles, move_fx);
+            handle_collisions(&mut self.player, &mut self.tiles, move_fx, dt);
             self.camera.focus(
                 self.player.pos.x as i32 + self.player.width as i32 / 2,
                 self.player.pos.y as i32 + self.player.height as i32 / 2,
@@ -152,22 +150,19 @@ impl State<BarnContext> for GameState {
         }
         let tex_player = context.load_texture(String::from("res/img/player.png"));
         self.player.draw(tex_player, &mut self.camera, bgfx);
-        // let tex_fire = context.load_texture(String::from("res/img/fire2.png"));
-        // let tex_glow = context
-        //     .texture_manager
-        //     .load("res/img/fire_glow.png")
-        //     .unwrap();
-        // for fire in self.flames.iter_mut() {
-        //     fire.draw(&tex_fire, &tex_glow, &mut self.camera, canvas)
-        // }
+        for fire in self.flames.iter_mut() {
+            fire.draw(context, &mut self.camera, bgfx)
+        }
         if self.won {
-            bgfx.sdl.set_draw_color(Color::from_rgba(0, 0, 0, 150));
+            bgfx.sdl.set_draw_color(Color::from_rgba(0, 0, 0, 50));
 
             // TODO: THIS MUST BE ADDED TO BARN
             //canvas.set_blend_mode(BlendMode::Blend);
             bgfx.sdl.draw_rect(0, 0, self.camera.width as u32, self.camera.height as u32, FillType::FILL, false);
 
             let font = context.load_font(*settings::FONT_DETAILS);
+
+            bgfx.sdl.set_draw_color(Color::from_rgba(255, 255, 255, 255));
 
             // Render the title.
             bgfx.sdl.draw_text("Solved!", font, 
@@ -248,9 +243,10 @@ impl GameState {
                         texture: GameState::get_texture_name(c),
                         bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
-                        resistance: 30,
+                        resistance: 30.0,
                         iswall: false,
                         isblock: false,
+                        moving: false
                     });
                     curx += TILE_WIDTH as i32;
                 } else if c == 'f' {
@@ -262,9 +258,10 @@ impl GameState {
                         texture: String::from("res/img/torch.png"),
                         bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
-                        resistance: 30,
+                        resistance: 30.0,
                         iswall: true,
                         isblock: false,
+                        moving: false, 
                     });
                     curx += TILE_WIDTH as i32;
                 } else if c == 'x' {
@@ -272,9 +269,10 @@ impl GameState {
                         texture: String::from("res/img/grayblock.png"),
                         bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
-                        resistance: 30,
+                        resistance: 30.0,
                         iswall: true,
                         isblock: false,
+                        moving: false, 
                     });
                     curx += TILE_WIDTH as i32;
                 } else if c == 'b' {
@@ -282,27 +280,30 @@ impl GameState {
                         texture: String::from("res/img/blueblock.png"),
                         bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
-                        resistance: 30,
+                        resistance: 30.0,
                         iswall: false,
                         isblock: true,
+                        moving: false, 
                     });
                 } else if c == 'g' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/greenblock.png"),
                         bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
-                        resistance: 30,
+                        resistance: 30.0,
                         iswall: false,
                         isblock: true,
+                        moving: false, 
                     });
                 } else if c == 'r' {
                     temp_blocks.push(Tile {
                         texture: String::from("res/img/redblock.png"),
                         bb: BoundingBox2D {origin: Vector2 {x: curx as f32, y: cury as f32}, width: TILE_WIDTH, height: TILE_HEIGHT},
                         target_pos: Vector2 {x: curx as f32, y: cury as f32},
-                        resistance: 30,
+                        resistance: 30.0,
                         iswall: false,
                         isblock: true,
+                        moving: false, 
                     });
                 } else if c == 'B' {
                     temp_eyes.push(Eye {

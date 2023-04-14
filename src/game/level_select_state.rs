@@ -1,10 +1,7 @@
 use barn::graphics::barn_gfx::BarnGFX;
-use barn::fonts::font_details::FontDetails;
 use barn::game::barn_context::BarnContext;
 use barn::graphics::color::Color;
 use barn::graphics::fill_type::FillType;
-use crate::game::player::Player;
-use barn::game::context::Context;
 use barn::game::state::State;
 use crate::game::camera::Camera;
 use crate::game::eye::Eye;
@@ -14,11 +11,8 @@ use crate::game::tile::Tile;
 use crate::settings;
 
 use sdl2::keyboard::Keycode;
-use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
 use std::collections::HashMap;
 use std::fs;
-use std::time::Instant;
 
 pub struct LevelSelectState {
     pub levels: HashMap<String, String>,
@@ -51,21 +45,25 @@ impl State<BarnContext> for LevelSelectState {
         } else if context.input.key_just_pressed(&Keycode::B) {
             return Some(Box::new(StartMenuState::new(0)));
         }
-        if prev_option != self.selected_option {
+        if prev_option != self.selected_option && settings::ENABLE_SOUND {
             let select_fx = context.load_sound(String::from("res/sound/select.ogg"));
             let channel = sdl2::mixer::Channel(1);
             channel.play(select_fx, 0);
         }
         if context.input.key_just_pressed(&Keycode::Return) {
             if self.selected_option == -1 {
-                let back_fx = context.load_sound(String::from("res/sound/back.ogg"));
-                let channel = sdl2::mixer::Channel(2);
-                channel.play(back_fx, 0);
+                if settings::ENABLE_SOUND {
+                    let back_fx = context.load_sound(String::from("res/sound/back.ogg"));
+                    let channel = sdl2::mixer::Channel(2);
+                    channel.play(back_fx, 0);
+                }
                 return Some(Box::new(StartMenuState::new(0)));
             } else {
-                let enter_fx = context.load_sound(String::from("res/sound/enter.ogg"));
-                let channel = sdl2::mixer::Channel(2);
-                channel.play(enter_fx, 0);
+                if settings::ENABLE_SOUND {
+                    let enter_fx = context.load_sound(String::from("res/sound/enter.ogg"));
+                    let channel = sdl2::mixer::Channel(2);
+                    channel.play(enter_fx, 0);
+                }
                 let key = self.options[self.selected_option as usize].clone();
                 let path = self.levels.get(&key).unwrap();
                 return Some(Box::new(GameState::new(path.to_string())));
@@ -136,49 +134,29 @@ impl State<BarnContext> for LevelSelectState {
             counter += 1;
         }
 
+        if self.selected_option == -1 {
+            bgfx.sdl.set_draw_color(Color::from_rgb(255, 255, 255));
+            bgfx.sdl.draw_rect(
+                0,
+                self.camera.height - 50, 
+                100, 
+                50, 
+                FillType::FILL, 
+                false);
+        }
         let color = if self.selected_option == -1 {
             Color::from_rgb(0, 0, 0)
         } else {
             Color::from_rgb(255, 255, 255)
         };
-        if self.selected_option == -1 {
-            bgfx.sdl.draw_rect(
-                0,
-                self.camera.height - 100, 
-                100, 
-                50, 
-                FillType::LINE, 
-                false);
-        }
+        bgfx.sdl.set_draw_color(color);
         bgfx.sdl.draw_text("< Back", font, 
             0.0,
-            (self.camera.height - 100) as f32,
+            (self.camera.height - 50) as f32,
             2.0,
             2.0,
-            true,
-            true);
-        // canvas
-        //     .copy(
-        //         &back_tex,
-        //         None,
-        //         Rect::new(
-        //             0,
-        //             self.camera.height - back.size().1 as i32 * 2,
-        //             back.size().0 * 2,
-        //             back.size().1 * 2,
-        //         ),
-        //     )
-        //     .unwrap();
-        // canvas.set_draw_color(Color::RGB(255, 255, 255));
-        // canvas
-        //     .draw_rect(Rect::new(
-        //         0,
-        //         self.camera.height - back.size().1 as i32 * 2,
-        //         back.size().0 * 2,
-        //         back.size().1 * 2,
-        //     ))
-        //     .unwrap();
-        // canvas.present();
+            false,
+            false);
         bgfx.sdl.present();
     }
 

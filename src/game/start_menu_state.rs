@@ -59,44 +59,53 @@ impl State<BarnContext> for StartMenuState {
         }
        
         if prev_option != self.selected_option {
-            let channel = sdl2::mixer::Channel(1);
-            let select_fx = context.load_sound(String::from("res/sound/select.ogg"));
-            channel.play(select_fx, 0).unwrap();
+            if (settings::ENABLE_SOUND) {
+                let channel = sdl2::mixer::Channel(1);
+                let select_fx = context.load_sound(String::from("res/sound/select.ogg"));
+                channel.play(select_fx, 0).unwrap();
+            }
+            
             self.tiles.clear();
             if self.selected_option == 0 {
                 self.tiles.push(Tile {
                     texture: String::from("res/img/blueblock.png"),
                     bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 200.0}, width: 64, height: 64},
                     target_pos: Vector2 {x: 200.0, y: 200.0},
-                    resistance: 30,
+                    resistance: 30.0,
                     iswall: false,
                     isblock: true,
+                    moving: false, 
                 });
             } else if self.selected_option == 1 {
                 self.tiles.push(Tile {
                     texture: String::from("res/img/greenblock.png"),
                     bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 300.0}, width: 64, height: 64},
                     target_pos: Vector2 {x: 200.0, y: 500.0},
-                    resistance: 30,
+                    resistance: 30.0,
                     iswall: false,
                     isblock: true,
+                    moving: false, 
                 });
             } else if self.selected_option == 2 {
                 self.tiles.push(Tile {
                     texture: String::from("res/img/redblock.png"),
                     bb: BoundingBox2D {origin: Vector2 {x: (self.camera.width / 2 - 32) as f32, y: 300.0}, width: 64, height: 64},
                     target_pos: Vector2 {x: 200.0, y: 200.0},
-                    resistance: 30,
+                    resistance: 30.0,
                     iswall: false,
                     isblock: true,
+                    moving: false, 
                 });
             }
         }
        
         if context.input.key_just_pressed(&Keycode::Return) {
-            let enter_fx = context.load_sound(String::from("res/sound/enter.ogg"));
-            let channel = sdl2::mixer::Channel(2);
-            channel.play(enter_fx, 0).unwrap();
+            if (settings::ENABLE_SOUND) {
+                let enter_fx = context.load_sound(String::from("res/sound/enter.ogg"));
+                let channel = sdl2::mixer::Channel(2);
+                channel.play(enter_fx, 0).unwrap();
+            }
+            
             if self.selected_option == 0 {
                 return Some(Box::new(LevelSelectState {
                     levels: HashMap::new(),
@@ -257,27 +266,30 @@ impl State<BarnContext> for StartMenuState {
                 texture: String::from("res/img/blueblock.png"),
                 bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 200.0}, width: 64, height: 64},
                 target_pos: Vector2 {x: 200.0, y: 200.0},
-                resistance: 30,
+                resistance: 30.0,
                 iswall: false,
                 isblock: true,
+                moving: false, 
             });
         } else if self.selected_option == 1 {
             self.tiles.push(Tile {
                 texture: String::from("res/img/greenblock.png"),
                 bb: BoundingBox2D {origin: Vector2 {x: 200.0, y: 300.0}, width: 64, height: 64},
                 target_pos: Vector2 {x: 200.0, y: 500.0},
-                resistance: 30,
+                resistance: 30.0,
                 iswall: false,
                 isblock: true,
+                moving: false, 
             });
         } else if self.selected_option == 2 {
             self.tiles.push(Tile {
                 texture: String::from("res/img/redblock.png"),
                 bb: BoundingBox2D {origin: Vector2 {x: (self.camera.width / 2 - 32) as f32, y: 300.0}, width: 64, height: 64},
                 target_pos: Vector2 {x: 200.0, y: 200.0},
-                resistance: 30,
+                resistance: 30.0,
                 iswall: false,
                 isblock: true,
+                moving: false, 
             });
         }
         

@@ -1,9 +1,10 @@
 use crate::game::camera::Camera;
 use std::collections::HashMap;
 
+use barn::game::barn_context::BarnContext;
+use barn::graphics::barn_gfx::BarnGFX;
 use rand::distributions::{Distribution, Uniform};
 
-use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
 use sdl2::render::WindowCanvas;
@@ -60,38 +61,31 @@ impl Fire {
 
     pub fn draw(
         &mut self,
-        texture: &Texture,
-        glow_texture: &Texture,
+        context: &mut BarnContext,
         camera: &mut Camera,
-        canvas: &mut WindowCanvas,
+        bgfx: &mut BarnGFX,
     ) {
-        canvas
-            .copy_ex(
-                &texture,
-                self.animations.get(&self.active_animation).unwrap()[self.frame as usize],
-                Rect::new(
+        let texture = context.load_texture(String::from("res/img/fire2.png"));
+        bgfx.sdl.draw_texture(
+                texture,
+                Some(self.animations.get(&self.active_animation).unwrap()[self.frame as usize]),
+                Some(Rect::new(
                     self.x - camera.x,
                     self.y - camera.y,
                     self.width,
                     self.height,
-                ),
-                0.0,
-                None,
-                false,
-                false,
-            )
-            .unwrap();
-        canvas
-            .copy(
-                &glow_texture,
-                self.animations.get("glow").unwrap()[self.frame as usize],
+                ))
+            );
+        let glow_texture = context.load_texture(String::from("res/img/fire_glow.png"));
+        bgfx.sdl.draw_texture(
+                glow_texture,
+                Some(self.animations.get("glow").unwrap()[self.frame as usize]),
                 Some(Rect::new(
                     self.x - camera.x - 32 + self.width as i32 / 2,
                     self.y - camera.y - 4,
                     64,
                     64,
                 )),
-            )
-            .unwrap();
+            );
     }
 }

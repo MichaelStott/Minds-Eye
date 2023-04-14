@@ -19,9 +19,12 @@ pub struct HelpState {
 impl State<BarnContext> for HelpState {
     fn update(&mut self, context: &mut BarnContext, dt: f32) -> Option<Box<dyn State<BarnContext>>> {
         if context.input.key_just_pressed(&Keycode::Return) {
-            let back_fx = context.load_sound(String::from("res/sound/back.ogg"));
-            let channel = sdl2::mixer::Channel(2);
-            channel.play(back_fx, 0).unwrap();
+            if (settings::ENABLE_SOUND) {
+                let back_fx = context.load_sound(String::from("res/sound/back.ogg"));
+                let channel = sdl2::mixer::Channel(2);
+                channel.play(back_fx, 0).unwrap();
+            }
+            
             return Some(Box::new(StartMenuState::new(1)));
         }
         None
