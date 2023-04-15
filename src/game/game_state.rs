@@ -1,4 +1,5 @@
 use barn::graphics::barn_gfx::BarnGFX;
+use barn::graphics::SdlBlendType;
 use barn::game::barn_context::BarnContext;
 use barn::graphics::color::Color;
 use barn::graphics::fill_type::FillType;
@@ -154,10 +155,8 @@ impl State<BarnContext> for GameState {
             fire.draw(context, &mut self.camera, bgfx)
         }
         if self.won {
-            bgfx.sdl.set_draw_color(Color::from_rgba(0, 0, 0, 50));
-
-            // TODO: THIS MUST BE ADDED TO BARN
-            //canvas.set_blend_mode(BlendMode::Blend);
+            bgfx.sdl.set_draw_color(Color::from_rgba(0, 0, 0, 150));
+            bgfx.sdl.set_blend_mode(SdlBlendType::Blend);
             bgfx.sdl.draw_rect(0, 0, self.camera.width as u32, self.camera.height as u32, FillType::FILL, false);
 
             let font = context.load_font(*settings::FONT_DETAILS);
@@ -174,11 +173,11 @@ impl State<BarnContext> for GameState {
 
             // Render number of moves.
             bgfx.sdl.draw_text(&format!("Moves taken: {}", self.moves), font, 
-                self.camera.width as f32 / 2.0, self.camera.height as f32 / 2.0, 3.0, 3.0, true, true);
+                self.camera.width as f32 / 2.0, self.camera.height as f32 * 0.6, 3.0, 3.0, true, true);
 
             // Render number of moves.
             bgfx.sdl.draw_text("Press enter to go back", font, 
-                0.0, self.camera.height as f32 / 2.0, 2.0, 2.0, false, false);
+                0.0, self.camera.height as f32 * 0.9, 2.0, 2.0, false, false);
             
         }
         bgfx.sdl.present();

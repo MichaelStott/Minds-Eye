@@ -9,6 +9,9 @@ clean:
 dep: ## Download SDL2 dependencies
 	@echo TODO
 
+update:
+	@cargo update
+	
 build: ## Pull dependencies and build project 
 	@cargo build
 

@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 
 use barn::fonts::font_details::FontDetails;
 
-pub const DEBUG: bool = false;
+pub const DEBUG: bool = true;
 pub const TITLE: &str = "Mind's Eye";
 pub const ENABLE_SOUND: bool = true;
 
