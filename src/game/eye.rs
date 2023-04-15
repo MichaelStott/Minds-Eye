@@ -1,11 +1,11 @@
 extern crate rand;
 
+use barn::graphics::barn_gfx::BarnGFX;
 use crate::game::camera::Camera;
 use crate::game::tile::Tile;
 
 use sdl2::rect::Rect;
 use sdl2::render::Texture;
-use sdl2::render::WindowCanvas;
 
 use rand::Rng;
 
@@ -17,13 +17,13 @@ pub struct Eye {
     pub y: i32,
     pub width: u32,
     pub height: u32,
-    pub deltax: i32,
-    pub deltay: i32,
+    pub deltax: f32,
+    pub deltay: f32,
     pub anger: u8,
 }
 
 impl Eye {
-    pub fn update(&mut self, tiles: &mut Vec<Tile>) {
+    pub fn update(&mut self, tiles: &mut Vec<Tile>, dt: f32) {
         let mut rng = rand::thread_rng();
         self.solved = false;
         let mut distance = -1.0;
@@ -79,12 +79,12 @@ impl Eye {
         if isblock {
             if self.direction == "left" {
                 self.solved = true;
-                self.deltax = if self.deltax > -12 {
-                    self.deltax - 1
+                self.deltax = if self.deltax > -12.0 {
+                    self.deltax - dt * 100.0
                 } else {
-                    -12
+                    -12.0
                 };
-                self.deltay = 0;
+                self.deltay = 0.0;
                 self.anger = if self.anger != 255 && self.anger as i32 + 10 < 255 {
                     self.anger + 10
                 } else {
@@ -92,12 +92,12 @@ impl Eye {
                 };
             } else if self.direction == "right" {
                 self.solved = true;
-                self.deltax = if self.deltax < 12 {
-                    self.deltax + 1
+                self.deltax = if self.deltax < 12.0 {
+                    self.deltax + dt * 100.0
                 } else {
-                    12
+                    12.0
                 };
-                self.deltay = 0;
+                self.deltay = 0.0;
                 self.anger = if self.anger != 255 && self.anger as i32 + 10 < 255 {
                     self.anger + 10
                 } else {
@@ -105,8 +105,8 @@ impl Eye {
                 };
             } else if self.direction == "up" {
                 self.solved = true;
-                self.deltay = if self.deltay < 6 { self.deltay + 1 } else { 6 };
-                self.deltax = 0;
+                self.deltay = if self.deltay < 6.0 { self.deltay + dt * 100.0 } else { 6.0 };
+                self.deltax = 0.0;
                 self.anger = if self.anger != 255 && self.anger as i32 + 10 < 255 {
                     self.anger + 10
                 } else {
@@ -114,12 +114,12 @@ impl Eye {
                 };
             } else if self.direction == "down" {
                 self.solved = true;
-                self.deltay = if self.deltay > -6 {
-                    self.deltay - 1
+                self.deltay = if self.deltay > -6.0 {
+                    self.deltay - dt * 100.0
                 } else {
-                    -6
+                    -6.0
                 };
-                self.deltax = 0;
+                self.deltax = 0.0;
                 self.anger = if self.anger != 255 && self.anger as i32 + 10 < 255 {
                     self.anger + 10
                 } else {
@@ -129,8 +129,8 @@ impl Eye {
         }
         // Jitter the pupil if unsolved.
         if !self.solved {
-            self.deltax = rng.gen_range(-3, 3);
-            self.deltay = rng.gen_range(-3, 3);
+            self.deltax = rng.gen_range(-3.0, 3.0);
+            self.deltay = rng.gen_range(-3.0, 3.0);
             self.anger = if self.anger != 0 && self.anger as i32 - 10 > 0 {
                 self.anger - 10
             } else {
@@ -143,7 +143,7 @@ impl Eye {
         &mut self,
         tex_socket: &mut Texture,
         camera: &mut Camera,
-        canvas: &mut WindowCanvas,
+        bgfx: &mut BarnGFX,
     ) {
         if self.color == "red" {
             tex_socket.set_color_mod(255, self.anger, self.anger);
@@ -153,37 +153,29 @@ impl Eye {
             tex_socket.set_color_mod(self.anger, self.anger, 255);
         }
 
-        canvas
-            .copy(
-                &tex_socket,
-                None,
-                Some(Rect::new(
-                    self.x - camera.x,
-                    self.y - camera.y,
-                    self.width,
-                    self.height,
-                )),
-            )
-            .unwrap();
+        bgfx.sdl.draw_texture(tex_socket, 
+            None, 
+            Some(Rect::new(
+                self.x - camera.x,
+                self.y - camera.y,
+                self.width,
+                self.height,
+            )));
     }
 
     pub fn draw_iris(
         &mut self,
-        tex_pupil: &Texture,
+        tex_pupil: &mut Texture,
         camera: &mut Camera,
-        canvas: &mut WindowCanvas,
+        bgfx: &mut BarnGFX,
     ) {
-        canvas
-            .copy(
-                &tex_pupil,
-                None,
-                Some(Rect::new(
-                    self.x - camera.x + self.deltax,
-                    self.y - camera.y + self.deltay,
-                    self.width,
-                    self.height,
-                )),
-            )
-            .unwrap();
+        bgfx.sdl.draw_texture(tex_pupil, 
+            None, 
+            Some(Rect::new(
+                self.x - camera.x + self.deltax as i32,
+                self.y - camera.y + self.deltay as i32,
+                self.width,
+                self.height,
+            )));
     }
 }
