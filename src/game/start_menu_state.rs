@@ -8,8 +8,6 @@ use barn::game::state::State;
 use crate::game::camera::Camera;
 use crate::game::credits_state::CreditsState;
 use crate::game::eye::Eye;
-// use crate::game::game_state::64;
-// use crate::game::game_state::64;
 use crate::game::help_state::HelpState;
 use crate::game::level_select_state::LevelSelectState;
 use crate::game::tile::Tile;

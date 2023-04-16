@@ -1,3 +1,4 @@
+#![windows_subsystem = "windows"]
 use barn::game::barn_context::BarnContext;
 use barn::game::game::Game;
 use barn::game::state::State;

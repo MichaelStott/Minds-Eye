@@ -1,11 +1,13 @@
 # Include lib and dll files for compilation and execution.
-export RUSTFLAGS=-L sdl2
+export RUSTFLAGS=-L sdl2"
 export SDL2_DIR="./sdl2"
 export PATH:=$(SDL2_DIR);$(PATH)
 
-clean:
+clean:	
 	@cargo clean
-
+	@del /S /Q release
+	@rmdir /S /Q release
+	
 dep: ## Download SDL2 dependencies
 	@echo TODO
 
@@ -18,8 +20,12 @@ build: ## Pull dependencies and build project
 dev: ## Run project in dev mode
 	@cargo run
 
-release: ## Build EXE folder and distributable project folder
-	@cargo build --release
+final: ## Compliles release folder with executable, dlls, and content
+	md release
+	cargo rustc --release -- -C link_args="-Wl,--subsystem,windows" -L sdl2
+	@xcopy target\release\minds_eye.exe release
+	@xcopy sdl2\\*.dll release
+	@xcopy /S /Q /I res release\res
 
 version:
 	@echo 0.0.0
