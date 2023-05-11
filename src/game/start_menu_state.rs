@@ -14,7 +14,6 @@ use crate::game::tile::Tile;
 use crate::settings;
 
 use sdl2::keyboard::Keycode;
-use sdl2::rect::Rect;
 
 use std::collections::HashMap;
 

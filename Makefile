@@ -29,3 +29,9 @@ final: ## Compliles release folder with executable, dlls, and content
 
 version:
 	@echo 0.0.0
+
+publish:
+	echo TODO
+
+_itch_io:
+	echo TODO
