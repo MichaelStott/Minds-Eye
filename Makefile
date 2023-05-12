@@ -11,10 +11,10 @@ export PATH:=$(SDL2_DIR);$(PATH)
 
 clean: ## Remove all builds and Rust dependencies
 	@cargo clean
-	@if exist "release" del /S /Q release
-	@if exist "release" rmdir /S /Q release
-	@if exist "lib" del /S /Q lib
-	@if exist "lib"  @rmdir /S /Q lib
+	@if exist "release" del /S /Q release >nul 2>&1
+	@if exist "release" rmdir /S /Q release >nul 2>&1
+	@if exist "lib" del /S /Q lib >nul 2>&1
+	@if exist "lib"  @rmdir /S /Q lib >nul 2>&1
 
 dep: ## Download SDL2 dependencies
 	@if not exist "lib" mkdir lib
