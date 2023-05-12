@@ -16,6 +16,7 @@ target/
 # Ignore SDL2 dependencies
 sdl2
 release
+lib
 /*.dll
 /*.lib
 README-SDL.txt
