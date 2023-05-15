@@ -15,21 +15,20 @@ The objective is to move the colored blocks into the line of sight of a matching
 
 ## Build
 
-Install the SDL2 dev dependencies for your environment.
+### Windows
 
-### Ubuntu SDL2 Installation
-```
-$ sudo apt install libsdl2-dev libsdl2-2.0-0 -y
-$ sudo apt install libjpeg9-dev libwebp-dev libtiff5-dev libsdl2-image-dev libsdl2-image-2.0-0 -y
-$ sudo apt install libmikmod-dev libfishsound1-dev libsmpeg-dev liboggz2-dev libflac-dev libfluidsynth-dev libsdl2-mixer-dev libsdl2-mixer-2.0-0 -y
-$ sudo apt install libfreetype6-dev libsdl2-ttf-dev libsdl2-ttf-2.0-0 -y
+If compiling for the first time, first pull the SDL2 dependencies for the project via:
+
+```sh
+$ make deps
 ```
 
-Then build and execute the game with the following:
+This will download the SDL2 libraries in a new `lib` folder.
 
-```
-$ cargo build --release
-$ ./target/release/game
+To launch the project in development mode, run
+
+```sh
+$ make dev
 ```
 
 ## Credits
