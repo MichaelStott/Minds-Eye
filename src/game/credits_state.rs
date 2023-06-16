@@ -41,7 +41,7 @@ impl State<BarnContext> for CreditsState {
             true,
             false);
 
-        bgfx.sdl.draw_text("Developed by Michael Stott", font, 
+        bgfx.sdl.draw_text("Developed by yam-head", font, 
             self.camera.width as f32 / 2.0,
             200.0,
             3.0,

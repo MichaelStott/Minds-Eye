@@ -1,0 +1,12 @@
+Level 1: An Easy One
+           Bx
+    fxxxf Bxb*Bx
+    x6Bx6x  Bx
+    xb**r6x 
+ Gx  x**6x  
+Gxg*Gx xxg6xx
+ Gx  x**6x   
+    x*p*6x  
+    x**6x  Rx 
+    fxxxf Rxr*Rx
+           Rx

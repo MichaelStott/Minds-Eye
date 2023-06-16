@@ -20,7 +20,7 @@ The objective is to move the colored blocks into the line of sight of a matching
 If compiling for the first time, first pull the SDL2 dependencies for the project via:
 
 ```sh
-$ make deps
+$ make lib
 ```
 
 This will download the SDL2 libraries in a new `lib` folder.

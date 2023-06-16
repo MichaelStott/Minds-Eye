@@ -16,7 +16,7 @@ clean: ## Remove all builds and Rust dependencies
 	@if exist "lib" del /S /Q lib >nul 2>&1
 	@if exist "lib"  @rmdir /S /Q lib >nul 2>&1
 
-dep: ## Download SDL2 dependencies
+lib: ## Download SDL2 dependencies
 	@if not exist "lib" mkdir lib
 	@curl -s -L --url $(SDL_URL) -o lib/sdl2.zip
 	@tar -C lib --strip-components=3 -zxf lib/sdl2.zip SDL2-2.26.5/lib/x64/SDL2.dll 
