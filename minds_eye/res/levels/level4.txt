@@ -1,9 +1,0 @@
-Level 4: Mostly Solved
-xxxxBxxxxxxGxxxxx
-x6f*6xx6xx*6f6x
-x*6x6x**6x6x*6x
-Bx***b**6Rx**g**6Gxx
-x*6x6x*p*6x6x*6x
-x6f*r6xxb6xx*6f6x
-x************6x
-xxxxxxxxxxGxxxxx

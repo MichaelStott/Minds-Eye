@@ -8,6 +8,7 @@ export SDL_MIX_URL?=https://github.com/libsdl-org/SDL_mixer/releases/download/re
 export RUSTFLAGS=-L lib"
 export SDL2_DIR="./lib"
 export PATH:=$(SDL2_DIR);$(PATH)
+export RUST_LOG=trace
 
 clean: ## Remove all builds and Rust dependencies
 	@cargo clean
@@ -30,8 +31,12 @@ lib: ## Download SDL2 dependencies
 	@curl -s -L --url $(SDL_MIX_URL) -o lib/mix.zip
 	@tar -C lib --strip-components=3 -zxf lib/mix.zip SDL2_mixer-2.6.3/lib/x64/SDL2_mixer.dll 
 	@tar -C lib --strip-components=3 -zxf lib/mix.zip SDL2_mixer-2.6.3/lib/x64/SDL2_mixer.lib 
+	@tar -C lib --strip-components=4 -zxf lib/mix.zip SDL2_mixer-2.6.3/lib/x64/optional/libmodplug-1.dll
+	@tar -C lib --strip-components=4 -zxf lib/mix.zip SDL2_mixer-2.6.3/lib/x64/optional/libogg-0.dll
+	@tar -C lib --strip-components=4 -zxf lib/mix.zip SDL2_mixer-2.6.3/lib/x64/optional/libopus-0.dll
+	@tar -C lib --strip-components=4 -zxf lib/mix.zip SDL2_mixer-2.6.3/lib/x64/optional/libopusfile-0.dll
 	@echo off
-	@del /S /Q lib\*.zip >nul 2>&1
+##	@del /S /Q lib\*.zip >nul 2>&1
 
 update: ## Update project dependencies
 	@cargo update
@@ -40,7 +45,10 @@ build: ## Pull dependencies and build project
 	@cargo build
 
 dev: ## Run project in dev mode
-	@cargo run
+	cargo run
+	
+profile: ## Locally profile the project
+	cargo flamegraph --dev
 
 release: ## Compliles release folder with executable, dlls, and content
 	md release

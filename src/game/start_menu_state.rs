@@ -1,3 +1,4 @@
+use barn::audio::load_music;
 use barn::graphics::barn_gfx::BarnGFX;
 use barn::game::barn_context::BarnContext;
 use barn::graphics::color::Color;
@@ -56,7 +57,7 @@ impl State<BarnContext> for StartMenuState {
         }
        
         if prev_option != self.selected_option {
-            if (settings::ENABLE_SOUND) {
+            if settings::ENABLE_SOUND {
                 let channel = sdl2::mixer::Channel(1);
                 let select_fx = context.load_sound(String::from("res/sound/select.ogg"));
                 channel.play(select_fx, 0).unwrap();
@@ -97,7 +98,7 @@ impl State<BarnContext> for StartMenuState {
         }
        
         if context.input.key_just_pressed(&Keycode::Return) {
-            if (settings::ENABLE_SOUND) {
+            if settings::ENABLE_SOUND {
                 let enter_fx = context.load_sound(String::from("res/sound/enter.ogg"));
                 let channel = sdl2::mixer::Channel(2);
                 channel.play(enter_fx, 0).unwrap();
@@ -292,6 +293,9 @@ impl State<BarnContext> for StartMenuState {
         
         self.camera.x = 0;
         self.camera.y = 0;
+        //let music = context.load_sound(String::from("res/sound/laidback.mp3"));
+        //let _ = load_music(String::from("res/sound/laidback.wav"));
+
     }
 
     fn on_exit(&mut self, context: &mut BarnContext) {
